@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Dashboard') — {{ $currentTenant->company_name ?? 'AutoDealer' }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background:#f1f5f9; font-size:14px; }
+        #sidebar { width:240px; min-width:240px; background:#1e293b; min-height:100vh; transition:width .2s; }
+        #sidebar .nav-link { color:#94a3b8; border-radius:8px; padding:8px 12px; font-size:13px; }
+        #sidebar .nav-link:hover, #sidebar .nav-link.active { background:#334155; color:#fff; }
+        #sidebar .nav-link i { width:18px; }
+        #sidebar .section-label { color:#475569; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:16px 12px 4px; }
+        .card { border-radius:12px; }
+        .table thead th { font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:#64748b; font-weight:600; }
+        .badge { font-weight:500; }
+        .required:after { content:" *"; color:#ef4444; }
+        .border-dashed { border-style: dashed !important; }
+        .side_menu {position: fixed;top: 0;width: 220px;padding-top:30px}
+        @media(max-width:768px){ #sidebar { display:none; } }
+    </style>
+    @stack('styles')
+</head>
+<body>
+<div class="d-flex">
+
+{{-- Sidebar --}}
+<div id="sidebar" class="flex-shrink-0 py-3 px-2">
+    <div class="side_menu">
+    <div class="px-3 pb-3 border-bottom border-slate-700 mb-2">
+        @if(isset($currentTenant) && $currentTenant->logo_path)
+            <img src="{{ Storage::url($currentTenant->logo_path) }}" style="max-height:36px;" class="mb-2">
+        @endif
+        <div class="text-white fw-bold" style="font-size:13px;">
+            {{ $currentTenant->company_name ?? '' }}
+        </div>
+        <div class="text-slate-400" style="font-size:11px;">{{ auth()->user()->branch->name ?? '' }}</div>
+    </div>
+
+    <ul class="nav flex-column gap-1">
+        <li><a href="{{ route('dashboard') }}" class="nav-link @active('dashboard')">
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+        </a></li>
+
+        @can('view-vehicles')
+        <li><a href="{{ route('vehicles.index') }}" class="nav-link @active('vehicles*')">
+            <i class="bi bi-car-front me-2"></i> Inventory
+        </a></li>
+        @endcan
+
+        @can('view-customers')
+        <li><a href="{{ route('customers.index') }}" class="nav-link @active('customers*')">
+            <i class="bi bi-people me-2"></i> Customers
+        </a></li>
+        @endcan
+
+        @can('view-leads')
+        <li><a href="{{ route('leads.index') }}" class="nav-link @active('leads*')">
+            <i class="bi bi-funnel me-2"></i> Leads
+        </a></li>
+        @endcan
+
+        @canany(['view-quotations','view-bookings','view-invoices'])
+        <div class="section-label">Sales</div>
+        @can('view-quotations')
+        <li><a href="{{ route('quotations.index') }}" class="nav-link @active('quotations*')">
+            <i class="bi bi-file-text me-2"></i> Quotations
+        </a></li>
+        @endcan
+        @can('view-bookings')
+        <li><a href="{{ route('bookings.index') }}" class="nav-link @active('bookings*')">
+            <i class="bi bi-calendar-check me-2"></i> Bookings
+        </a></li>
+        @endcan
+        @can('view-invoices')
+        <li><a href="{{ route('invoices.index') }}" class="nav-link @active('invoices*')">
+            <i class="bi bi-receipt me-2"></i> Invoices
+        </a></li>
+        @endcan
+        @endcanany
+
+        @can('view-trade-ins')
+        <li><a href="{{ route('trade-ins.index') }}" class="nav-link @active('trade-ins*')">
+            <i class="bi bi-arrow-left-right me-2"></i> Trade-Ins
+        </a></li>
+        @endcan
+
+        @can('generate-documents')
+        <li><a href="{{ route('documents.history') }}" class="nav-link @active('documents*')">
+            <i class="bi bi-file-earmark-text me-2"></i> Documents
+        </a></li>
+        @endcan
+
+        @can('view-whatsapp')
+        <div class="section-label">Communication</div>
+        <li><a href="{{ route('whatsapp.index') }}" class="nav-link @active('whatsapp*')">
+            <i class="bi bi-whatsapp me-2"></i> WhatsApp CRM
+        </a></li>
+        @endcan
+
+        @canany(['view-accounts','view-payments','view-expenses','view-vendors'])
+        <div class="section-label">Accounting</div>
+        @can('view-accounts')
+        <li><a href="{{ route('accounts.index') }}" class="nav-link @active('accounts*')">
+            <i class="bi bi-calculator me-2"></i> Chart of Accounts
+        </a></li>
+        @endcan
+        @can('view-journal-entries')
+        <li><a href="{{ route('journal-entries.index') }}" class="nav-link @active('journal-entries*')">
+            <i class="bi bi-journal-text me-2"></i> Journal Entries
+        </a></li>
+        @endcan
+        @can('view-payments')
+        <li><a href="{{ route('payments.index') }}" class="nav-link @active('payments*')">
+            <i class="bi bi-cash-stack me-2"></i> Payments
+        </a></li>
+        @endcan
+        @can('view-vendors')
+        <li><a href="{{ route('vendors.index') }}" class="nav-link @active('vendors*')">
+            <i class="bi bi-building-gear me-2"></i> Vendors
+        </a></li>
+        @endcan
+        @can('view-expenses')
+        <li><a href="{{ route('expenses.index') }}" class="nav-link @active('expenses*')">
+            <i class="bi bi-receipt-cutoff me-2"></i> Expenses
+        </a></li>
+        @endcan
+        @can('view-financial-reports')
+        <li><a href="{{ route('reports.profit-loss') }}" class="nav-link @active('reports*')">
+            <i class="bi bi-graph-up me-2"></i> Financial Reports
+        </a></li>
+        @endcan
+        @endcanany
+
+        @can('view-installments')
+        <div class="section-label">Finance</div>
+        <li><a href="{{ route('installments.index') }}" class="nav-link @active('installments*')">
+            <i class="bi bi-calendar-month me-2"></i> Installments
+        </a></li>
+        @endcan
+
+        @can('view-commissions')
+        <li><a href="{{ route('commissions.index') }}" class="nav-link @active('commissions*')">
+            <i class="bi bi-percent me-2"></i> Commissions
+        </a></li>
+        @endcan
+
+        @canany(['manage-branches','manage-users','manage-roles'])
+        <div class="section-label">Admin</div>
+        @can('manage-branches')
+        <li><a href="{{ route('branches.index') }}" class="nav-link @active('branches*')">
+            <i class="bi bi-building me-2"></i> Branches
+        </a></li>
+        @endcan
+        @can('manage-users')
+        <li><a href="{{ route('users.index') }}" class="nav-link @active('users*')">
+            <i class="bi bi-person-gear me-2"></i> Users
+        </a></li>
+        @endcan
+        @can('manage-roles')
+        <li><a href="{{ route('roles.index') }}" class="nav-link @active('roles*')">
+            <i class="bi bi-shield-check me-2"></i> Roles
+        </a></li>
+        @endcan
+        @endcanany
+    </ul>
+
+</div>
+</div>
+
+{{-- Main --}}
+<div class="flex-grow-1 d-flex flex-column" style="min-width:0;">
+
+    {{-- Top bar --}}
+    <nav class="navbar bg-white border-bottom px-4 py-2 sticky-top" style="z-index:100;">
+        <span class="text-muted small">@yield('breadcrumb','Dashboard')</span>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="text-muted small">{{ now()->format('d M Y') }}</span>
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name ?? '' }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li><a class="dropdown-item small" href="{{ route('profile.edit') }}">
+                        <i class="bi bi-person me-2"></i>Profile
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="dropdown-item small text-danger">
+                                <i class="bi bi-box-arrow-right me-2"></i>Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {{-- Flash messages --}}
+    <div class="px-4 pt-3">
+        @foreach(['success'=>'success','error'=>'danger','warning'=>'warning','info'=>'info'] as $key => $class)
+            @if(session($key))
+            <div class="alert alert-{{ $class }} alert-dismissible fade show py-2 small" role="alert">
+                {{ session($key) }}
+                <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+        @endforeach
+        @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show py-2 small">
+            <ul class="mb-0 ps-3">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+    </div>
+
+    {{-- Page content --}}
+    <main class="p-4 flex-grow-1">
+        @yield('content')
+    </main>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+window.initVehicleEditForm = function (scope) {
+    scope = scope || document;
+    const form = scope.querySelector('#vehicleForm');
+    if (!form || form.dataset.initialized) return;
+    form.dataset.initialized = '1';
+
+    const currentModelId   = form.dataset.modelId;
+    const currentVariantId = form.dataset.variantId;
+    const landingCost      = parseFloat(form.dataset.landingCost) || 0;
+
+    const makeSelect     = form.querySelector('.vf-make-select');
+    const modelSelect     = form.querySelector('.vf-model-select');
+    const variantSelect   = form.querySelector('.vf-variant-select');
+    const importStatus    = form.querySelector('.vf-import-status');
+    const auctionField    = form.querySelector('.vf-auction-grade-field');
+    const purchaseInput   = form.querySelector('.vf-purchase-price');
+    const repairInput     = form.querySelector('.vf-repair-cost');
+    const miscInput       = form.querySelector('.vf-misc-cost');
+    const saleInput       = form.querySelector('.vf-sale-price');
+    const totalCostEl     = form.querySelector('.vf-total-cost-display');
+    const profitEl        = form.querySelector('.vf-profit-display');
+    const profitBox       = form.querySelector('.vf-profit-box');
+
+    makeSelect?.addEventListener('change', function () {
+        const makeId = this.value;
+        modelSelect.innerHTML   = '<option value="">Loading...</option>';
+        variantSelect.innerHTML = '<option value="">No Variant</option>';
+
+        if (!makeId) { modelSelect.innerHTML = '<option value="">Select Model</option>'; return; }
+
+        fetch(`/ajax/vehicle-models?make_id=${makeId}`)
+            .then(r => r.json())
+            .then(models => {
+                modelSelect.innerHTML = '<option value="">Select Model</option>';
+                models.forEach(m => {
+                    const sel = m.id == currentModelId ? 'selected' : '';
+                    modelSelect.innerHTML += `<option value="${m.id}" ${sel}>${m.name}</option>`;
+                });
+            });
+    });
+
+    modelSelect?.addEventListener('change', function () {
+        const modelId = this.value;
+        variantSelect.innerHTML = '<option value="">Loading...</option>';
+
+        if (!modelId) { variantSelect.innerHTML = '<option value="">No Variant</option>'; return; }
+
+        fetch(`/ajax/vehicle-variants?model_id=${modelId}`)
+            .then(r => r.json())
+            .then(variants => {
+                variantSelect.innerHTML = '<option value="">No Variant</option>';
+                variants.forEach(v => {
+                    const sel = v.id == currentVariantId ? 'selected' : '';
+                    variantSelect.innerHTML += `<option value="${v.id}" ${sel}>${v.name}</option>`;
+                });
+            });
+    });
+
+    importStatus?.addEventListener('change', function () {
+        auctionField.style.display = ['imported', 'auction'].includes(this.value) ? '' : 'none';
+    });
+
+    function formatPKR(val) { return 'PKR ' + Math.round(val).toLocaleString('en-PK'); }
+    function parseNum(el) { return parseFloat(el?.value.replace(/,/g, '') || 0) || 0; }
+
+    function recalculate() {
+        const purchase  = parseNum(purchaseInput);
+        const repair    = parseNum(repairInput);
+        const misc      = parseNum(miscInput);
+        const sale      = parseNum(saleInput);
+        const totalCost = purchase + repair + misc + landingCost;
+        const profit    = sale - totalCost;
+
+        if (totalCostEl) totalCostEl.textContent = formatPKR(totalCost);
+        if (profitEl) profitEl.textContent = formatPKR(profit);
+        if (profitBox) profitBox.style.background = profit >= 0 ? '#f0fdf4' : '#fef2f2';
+        if (profitEl) profitEl.className = `fw-bold ${profit >= 0 ? 'text-success' : 'text-danger'} vf-profit-display`;
+    }
+
+    [purchaseInput, repairInput, miscInput, saleInput].forEach(el => {
+        el?.addEventListener('input', recalculate);
+    });
+
+    recalculate();
+};
+
+window.initInvoiceForm = function (scope) {
+    scope = scope || document;
+    const form = scope.querySelector('#invoiceForm');
+    if (!form || form.dataset.initialized) return;
+    form.dataset.initialized = '1';
+
+    const vehicleSelect = form.querySelector('.vf-inv-vehicle');
+    const saleInput     = form.querySelector('.vf-inv-sale');
+    const discInput     = form.querySelector('.vf-inv-discount');
+    const whtInput      = form.querySelector('.vf-inv-wht');
+    const paidInput     = form.querySelector('.vf-inv-paid');
+    const paidBox       = form.querySelector('.vf-inv-paid-box');
+    const netHidden      = form.querySelector('.vf-inv-net');
+    const netDisplay     = form.querySelector('.vf-inv-net-display');
+    const balanceDisplay = form.querySelector('.vf-inv-balance-display');
+    const payType        = form.querySelector('.vf-inv-paytype');
+
+    function recalc() {
+        const sale = parseFloat(saleInput.value) || 0;
+        const disc = parseFloat(discInput.value) || 0;
+        const wht  = parseFloat(whtInput.value)  || 0;
+        const paid = parseFloat(paidInput.value) || 0;
+        const net  = sale - disc - wht;
+        const balance = Math.max(0, net - paid);
+
+        netHidden.value = net.toFixed(2);
+        netDisplay.textContent = 'PKR ' + Math.round(net).toLocaleString('en-PK');
+        balanceDisplay.textContent = 'PKR ' + Math.round(balance).toLocaleString('en-PK');
+    }
+
+    [saleInput, discInput, whtInput, paidInput].forEach(el => el?.addEventListener('input', recalc));
+
+    vehicleSelect?.addEventListener('change', function () {
+        const opt = this.options[this.selectedIndex];
+        if (opt.dataset.price) { saleInput.value = opt.dataset.price; recalc(); }
+    });
+
+    payType?.addEventListener('change', function () {
+        paidBox.style.display = this.value === 'installment' ? 'none' : '';
+    });
+
+    recalc();
+};
+
+// ══════════════════════════ Generic AJAX modal helpers ══════════════════════════
+function ajaxCsrfToken() {
+    return document.querySelector('meta[name=csrf-token]')?.content || '';
+}
+
+function genericSubmitForm(formSelector, { onSuccess, onError, buttonEl, busyText, idleHtml }) {
+    const form = document.querySelector(formSelector);
+    if (!form) return;
+
+    if (buttonEl) { buttonEl.disabled = true; buttonEl.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> ${busyText || 'Saving...'}`; }
+
+    fetch(form.action || form.dataset.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(data => onSuccess(data))
+        .catch(err => {
+            if (buttonEl) { buttonEl.disabled = false; buttonEl.innerHTML = idleHtml || 'Save'; }
+            let msg = err.message || 'Something went wrong.';
+            if (err.errors) msg = Object.values(err.errors).flat().join(' ');
+            onError(msg);
+        });
+}
+
+// ── Quotations ──
+function openQuotationViewModal(url) {
+    document.getElementById('quotationViewModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('quotationViewModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('quotationViewModalBody').innerHTML = html; });
+}
+function openQuotationFormModal(url) {
+    document.getElementById('quotationFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('quotationFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('quotationFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('quotationFormModalBody').innerHTML = html; });
+}
+function submitQuotationFormModal() {
+    const btn = document.getElementById('quotationFormModalSaveBtn');
+    genericSubmitForm('#quotationFormModalBody #quotationForm', {
+        buttonEl: btn, busyText: 'Creating...', idleHtml: '<i class="bi bi-check2 me-1"></i> Create',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('quotationFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+function updateQuotationStatus(id, status) {
+    fetch(`/quotations/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: JSON.stringify({ status }),
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to update status.'));
+}
+
+// ── Bookings ──
+function openBookingViewModal(url) {
+    document.getElementById('bookingViewModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('bookingViewModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('bookingViewModalBody').innerHTML = html; });
+}
+function openBookingFormModal(url) {
+    document.getElementById('bookingFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('bookingFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('bookingFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('bookingFormModalBody').innerHTML = html; });
+}
+function submitBookingFormModal() {
+    const btn = document.getElementById('bookingFormModalSaveBtn');
+    genericSubmitForm('#bookingFormModalBody #bookingForm', {
+        buttonEl: btn, busyText: 'Creating...', idleHtml: '<i class="bi bi-check2 me-1"></i> Create Booking',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('bookingFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+let bookingCancelId = null;
+function openBookingCancelModal(id) {
+    bookingCancelId = id;
+    bootstrap.Modal.getInstance(document.getElementById('bookingViewModal'))?.hide();
+    new bootstrap.Modal(document.getElementById('bookingCancelModal')).show();
+}
+function submitBookingCancel() {
+    const reason = document.getElementById('bookingCancelReason').value;
+    if (!reason) { alert('Please enter a cancellation reason.'); return; }
+
+    fetch(`/bookings/${bookingCancelId}/cancel`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: JSON.stringify({ reason }),
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to cancel booking.'));
+}
+
+// ── Invoices ──
+function openInvoiceViewModal(url) {
+    document.getElementById('invoiceViewModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('invoiceViewModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('invoiceViewModalBody').innerHTML = html; });
+}
+function openInvoiceFormModal(url) {
+    document.getElementById('invoiceFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('invoiceFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('invoiceFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById('invoiceFormModalBody').innerHTML = html;
+            window.initInvoiceForm(document.getElementById('invoiceFormModalBody'));
+        });
+}
+function submitInvoiceFormModal() {
+    const btn = document.getElementById('invoiceFormModalSaveBtn');
+    genericSubmitForm('#invoiceFormModalBody #invoiceForm', {
+        buttonEl: btn, busyText: 'Creating...', idleHtml: '<i class="bi bi-check2 me-1"></i> Create Invoice',
+        onSuccess: (data) => {
+            if (data.needs_installment_plan && data.installment_url) {
+                window.location.href = data.installment_url;
+            } else {
+                window.location.reload();
+            }
+        },
+        onError: msg => {
+            const box = document.getElementById('invoiceFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+function submitInvoicePayment(invoiceId) {
+    genericSubmitForm('#invoicePaymentForm', {
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('invoicePaymentError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+
+// ── Trade-Ins ──
+function openTradeInViewModal(url) {
+    document.getElementById('tradeInViewModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('tradeInViewModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('tradeInViewModalBody').innerHTML = html; });
+}
+function openTradeInFormModal(url) {
+    document.getElementById('tradeInFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('tradeInFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('tradeInFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('tradeInFormModalBody').innerHTML = html; });
+}
+function submitTradeInFormModal() {
+    const btn = document.getElementById('tradeInFormModalSaveBtn');
+    genericSubmitForm('#tradeInFormModalBody #tradeInForm', {
+        buttonEl: btn, busyText: 'Submitting...', idleHtml: '<i class="bi bi-check2 me-1"></i> Submit',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('tradeInFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+function submitTradeInApproval(id) {
+    const value = document.getElementById('tradeInApprovedValue' + id).value;
+    fetch(`/trade-ins/${id}/approve`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: JSON.stringify({ approved_value: value }),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => {
+            const box = document.getElementById('tradeInApproveError');
+            if (box) { box.textContent = err.message || 'Failed to approve.'; box.classList.remove('d-none'); }
+        });
+}
+// ── Documents ──
+function openDocumentViewModal(url) {
+    document.getElementById('documentViewFrame').src = url;
+    new bootstrap.Modal(document.getElementById('documentViewModal')).show();
+}
+// ══════════════ Vehicle Images ══════════════
+function submitVehicleImageUpload() {
+    const form = document.getElementById('vehicleImageUploadForm');
+    const input = document.getElementById('vehicleImageInput');
+    if (!input.files.length) return;
+
+    fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => {
+            let msg = err.message || 'Upload failed.';
+            if (err.errors) msg = Object.values(err.errors).flat().join(' ');
+            alert(msg);
+        });
+}
+
+function setFeaturedVehicleImage(vehicleId, mediaId) {
+    fetch(`/vehicles/${vehicleId}/images/${mediaId}/feature`, {
+        method: 'PATCH',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content },
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to set featured image.'));
+}
+
+function deleteVehicleImage(vehicleId, mediaId) {
+    if (!confirm('Remove this photo?')) return;
+
+    fetch(`/vehicles/${vehicleId}/images/${mediaId}`, {
+        method: 'DELETE',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content },
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to remove photo.'));
+}
+
+// ══════════════ Vehicle Detail Tabs (Details/Costs/File/QR/Transfers/History) ══════════════
+window.initVehicleDetailTabs = function (scope) {
+    scope = scope || document;
+
+    // Auto-open tab from URL hash (only relevant on the standalone full page)
+    if (scope === document) {
+        const hash = window.location.hash;
+        if (hash) {
+            const tabEl = scope.querySelector(`[href="${hash}"]`);
+            if (tabEl) new bootstrap.Tab(tabEl).show();
+        }
+    }
+};
+// ══════════════ Vehicle Documents (multi-row batch upload) ══════════════
+let documentRowCounter = 0;
+
+function addDocumentRow(vehicleId, buttonEl) {
+    const docTypes = JSON.parse(buttonEl.dataset.docTypes || '{}');
+    const expirableTypes = JSON.parse(buttonEl.dataset.expirableTypes || '[]');
+    const rowId = 'docrow-' + (++documentRowCounter);
+
+    let typeOptions = '<option value="">Document Type</option>';
+    for (const [key, label] of Object.entries(docTypes)) {
+        typeOptions += `<option value="${key}">${label}</option>`;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'row g-2 align-items-start mb-2 pb-2 border-bottom';
+    row.id = rowId;
+    row.innerHTML = `
+        <div class="col-md-3">
+            <select class="form-select form-select-sm doc-type-select" required>${typeOptions}</select>
+        </div>
+        <div class="col-md-2 doc-label-field" style="display:none;">
+            <input type="text" class="form-control form-control-sm doc-label-input" placeholder="Document label">
+        </div>
+        <div class="col-md-2 doc-expiry-field" style="display:none;">
+            <input type="date" class="form-control form-control-sm doc-expiry-input">
+        </div>
+        <div class="col-md-3">
+            <input type="file" class="form-control form-control-sm doc-file-input" accept=".pdf,.jpg,.jpeg,.png,.webp" required>
+        </div>
+        <div class="col-md-1">
+            <div class="form-check mt-1">
+                <input class="form-check-input doc-original-input" type="checkbox">
+                <label class="form-check-label small">Original</label>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-light btn-sm text-danger" onclick="removeDocumentRow('${rowId}', '${vehicleId}')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    `;
+
+    document.getElementById(`documentRows-${vehicleId}`).appendChild(row);
+
+    const typeSelect = row.querySelector('.doc-type-select');
+    typeSelect.addEventListener('change', function () {
+        row.querySelector('.doc-label-field').style.display = this.value === 'other' ? '' : 'none';
+        row.querySelector('.doc-expiry-field').style.display = expirableTypes.includes(this.value) ? '' : 'none';
+    });
+
+    document.getElementById(`documentRowsEmpty-${vehicleId}`)?.classList.add('d-none');
+    document.getElementById(`documentUploadAllWrap-${vehicleId}`)?.classList.remove('d-none');
+}
+
+function removeDocumentRow(rowId, vehicleId) {
+    document.getElementById(rowId)?.remove();
+
+    const rowsContainer = document.getElementById(`documentRows-${vehicleId}`);
+    if (rowsContainer && rowsContainer.children.length === 0) {
+        document.getElementById(`documentUploadAllWrap-${vehicleId}`)?.classList.add('d-none');
+        document.getElementById(`documentRowsEmpty-${vehicleId}`)?.classList.remove('d-none');
+    }
+}
+
+function submitAllDocuments(vehicleId) {
+    const form = document.getElementById(`documentBatchForm-${vehicleId}`);
+    const rowsContainer = document.getElementById(`documentRows-${vehicleId}`);
+    const errorBox = document.getElementById(`documentBatchError-${vehicleId}`);
+    errorBox.classList.add('d-none');
+
+    const rows = Array.from(rowsContainer.children);
+    if (rows.length === 0) return;
+
+    const fd = new FormData();
+    fd.append('_token', document.querySelector('meta[name=csrf-token]')?.content || '');
+
+    let valid = true;
+    rows.forEach((row, i) => {
+        const type = row.querySelector('.doc-type-select').value;
+        const file = row.querySelector('.doc-file-input').files[0];
+        const label = row.querySelector('.doc-label-input')?.value || '';
+        const expiry = row.querySelector('.doc-expiry-input')?.value || '';
+        const original = row.querySelector('.doc-original-input').checked;
+
+        if (!type || !file) { valid = false; return; }
+
+        fd.append(`documents[${i}][document_type]`, type);
+        fd.append(`documents[${i}][file]`, file);
+        if (label) fd.append(`documents[${i}][document_label]`, label);
+        if (expiry) fd.append(`documents[${i}][expiry_date]`, expiry);
+        fd.append(`documents[${i}][is_original]`, original ? '1' : '0');
+    });
+
+    if (!valid) {
+        errorBox.textContent = 'Please select a document type and choose a file for every row.';
+        errorBox.classList.remove('d-none');
+        return;
+    }
+
+    fetch(form.dataset.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd,
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => { window.location.reload(); })
+        .catch(err => {
+            let msg = err.message || 'Upload failed.';
+            if (err.errors) msg = Object.values(err.errors).flat().join(' ');
+            errorBox.textContent = msg;
+            errorBox.classList.remove('d-none');
+        });
+}
+// ══════════════ Vehicle Status Change ══════════════
+function submitVehicleStatusChange(event, vehicleId) {
+    event.preventDefault();
+    const form = document.getElementById(`statusForm-${vehicleId}`);
+    const errorBox = document.getElementById(`statusFormError-${vehicleId}`);
+    errorBox.classList.add('d-none');
+
+    // PHP does not parse multipart/form-data bodies for PATCH/PUT/DELETE
+    // requests (only POST) — so we must send this as URL-encoded data,
+    // not as a raw FormData object, for the fields to actually arrive.
+    const params = new URLSearchParams();
+    new FormData(form).forEach((value, key) => params.append(key, value));
+
+    fetch(form.dataset.url, {
+        method: 'PATCH',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRF-TOKEN': ajaxCsrfToken(),
+        },
+        body: params.toString(),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => {
+            errorBox.textContent = err.message || 'Failed to update status.';
+            errorBox.classList.remove('d-none');
+        });
+
+    return false;
+}
+
+// ══════════════ Vehicle Documents (verify/delete) ══════════════
+function verifyVehicleDocument(vehicleId, documentId) {
+    fetch(`/vehicles/${vehicleId}/documents/${documentId}/verify`, {
+        method: 'PATCH',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to verify document.'));
+}
+
+function deleteVehicleDocument(vehicleId, documentId) {
+    if (!confirm('Remove this document?')) return;
+
+    fetch(`/vehicles/${vehicleId}/documents/${documentId}`, {
+        method: 'DELETE',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to remove document.'));
+}
+
+// ══════════════ QR Regenerate ══════════════
+function regenerateVehicleQr(vehicleId) {
+    if (!confirm('Regenerate QR code? The old QR code will stop working.')) return;
+
+    fetch(`/vehicles/${vehicleId}/qr/regenerate`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to regenerate QR code.'));
+}
+
+// ══════════════ Vehicle Transfers ══════════════
+function submitVehicleTransferInitiate(event, vehicleId) {
+    event.preventDefault();
+    const form = document.getElementById(`transferInitiateForm-${vehicleId}`);
+    const errorBox = document.getElementById(`transferInitiateError-${vehicleId}`);
+    errorBox.classList.add('d-none');
+
+    fetch(form.dataset.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => {
+            errorBox.textContent = err.message || 'Failed to request transfer.';
+            errorBox.classList.remove('d-none');
+        });
+
+    return false;
+}
+
+function respondToVehicleTransfer(transferId, action) {
+    let body = null;
+
+    if (action === 'reject') {
+        const reason = prompt('Reason for rejecting this transfer:', 'Rejected');
+        if (reason === null) return;
+        body = new URLSearchParams({ reason }).toString();
+    }
+
+    fetch(`/vehicles/transfers/${transferId}/${action}`, {
+        method: 'PATCH',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': ajaxCsrfToken(),
+            ...(body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
+        },
+        body,
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => alert(err.message || 'Failed to update transfer.'));
+}
+window.initPaymentForm = function (scope) {
+    scope = scope || document;
+    const form = scope.querySelector('#paymentForm');
+    if (!form || form.dataset.initialized) return;
+    form.dataset.initialized = '1';
+
+    const partyType = form.querySelector('.vf-pay-party-type');
+    const custSel = form.querySelector('.vf-pay-party-customer');
+    const vendSel = form.querySelector('.vf-pay-party-vendor');
+    const empSel  = form.querySelector('.vf-pay-party-employee');
+    const otherIn = form.querySelector('.vf-pay-party-other');
+
+    function togglePartySelectors() {
+        const val = partyType.value;
+        [custSel, vendSel, empSel, otherIn].forEach(el => { el.style.display = 'none'; el.disabled = true; });
+        const map = { customer: custSel, vendor: vendSel, employee: empSel, other: otherIn };
+        const active = map[val];
+        if (active) { active.style.display = ''; active.disabled = false; }
+    }
+
+    partyType?.addEventListener('change', togglePartySelectors);
+    togglePartySelectors();
+};
+
+// ══════════════ Payments ══════════════
+function openPaymentFormModal(url, label) {
+    document.getElementById('paymentFormModalTitle').textContent = label ? 'Edit Payment' : 'Record Payment';
+    document.getElementById('paymentFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('paymentFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('paymentFormModal')).show();
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById('paymentFormModalBody').innerHTML = html;
+            window.initPaymentForm(document.getElementById('paymentFormModalBody'));
+        });
+}
+function submitPaymentFormModal() {
+    const btn = document.getElementById('paymentFormModalSaveBtn');
+    genericSubmitForm('#paymentFormModalBody #paymentForm', {
+        buttonEl: btn, busyText: 'Saving...', idleHtml: '<i class="bi bi-check2 me-1"></i> Save',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('paymentFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+let paymentDeleteContext = null;
+function openPaymentDeleteModal(url, label, triggerEl) {
+    paymentDeleteContext = { url, row: triggerEl.closest('tr') };
+    document.getElementById('paymentDeleteModalName').textContent = label;
+    document.getElementById('paymentDeleteModalError').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('paymentDeleteModal')).show();
+}
+function submitPaymentDeleteModal() {
+    if (!paymentDeleteContext) return;
+    const errorBox = document.getElementById('paymentDeleteModalError');
+    const btn = document.getElementById('paymentDeleteModalConfirmBtn');
+    errorBox.classList.add('d-none');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting...';
+    const fd = new FormData(); fd.append('_method', 'DELETE');
+    fetch(paymentDeleteContext.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: fd,
+    })
+        .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+        .then(() => {
+            bootstrap.Modal.getInstance(document.getElementById('paymentDeleteModal')).hide();
+            paymentDeleteContext.row?.remove();
+            paymentDeleteContext = null;
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-trash me-1"></i> Delete';
+            errorBox.textContent = err.message || 'Failed to delete payment.';
+            errorBox.classList.remove('d-none');
+        });
+}
+
+// ══════════════ Vendors ══════════════
+function openVendorFormModal(url, label) {
+    document.getElementById('vendorFormModalTitle').textContent = label ? 'Edit Vendor' : 'Add Vendor';
+    document.getElementById('vendorFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('vendorFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('vendorFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('vendorFormModalBody').innerHTML = html; });
+}
+function submitVendorFormModal() {
+    const btn = document.getElementById('vendorFormModalSaveBtn');
+    genericSubmitForm('#vendorFormModalBody #vendorForm', {
+        buttonEl: btn, busyText: 'Saving...', idleHtml: '<i class="bi bi-check2 me-1"></i> Save',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('vendorFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+let vendorDeleteContext = null;
+function openVendorDeleteModal(url, label, triggerEl) {
+    vendorDeleteContext = { url, row: triggerEl.closest('tr') };
+    document.getElementById('vendorDeleteModalName').textContent = label;
+    document.getElementById('vendorDeleteModalError').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('vendorDeleteModal')).show();
+}
+function submitVendorDeleteModal() {
+    if (!vendorDeleteContext) return;
+    const errorBox = document.getElementById('vendorDeleteModalError');
+    const btn = document.getElementById('vendorDeleteModalConfirmBtn');
+    errorBox.classList.add('d-none');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting...';
+    const fd = new FormData(); fd.append('_method', 'DELETE');
+    fetch(vendorDeleteContext.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: fd,
+    })
+        .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+        .then(() => {
+            bootstrap.Modal.getInstance(document.getElementById('vendorDeleteModal')).hide();
+            vendorDeleteContext.row?.remove();
+            vendorDeleteContext = null;
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-trash me-1"></i> Delete';
+            errorBox.textContent = err.message || 'Failed to delete vendor.';
+            errorBox.classList.remove('d-none');
+        });
+}
+
+// ══════════════ Expenses ══════════════
+function openExpenseFormModal(url, label) {
+    document.getElementById('expenseFormModalTitle').textContent = label ? 'Edit Expense' : 'Add Expense';
+    document.getElementById('expenseFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('expenseFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('expenseFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('expenseFormModalBody').innerHTML = html; });
+}
+function submitExpenseFormModal() {
+    const btn = document.getElementById('expenseFormModalSaveBtn');
+    genericSubmitForm('#expenseFormModalBody #expenseForm', {
+        buttonEl: btn, busyText: 'Saving...', idleHtml: '<i class="bi bi-check2 me-1"></i> Save',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('expenseFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+let expenseDeleteContext = null;
+function openExpenseDeleteModal(url, label, triggerEl) {
+    expenseDeleteContext = { url, row: triggerEl.closest('tr') };
+    document.getElementById('expenseDeleteModalName').textContent = label;
+    document.getElementById('expenseDeleteModalError').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('expenseDeleteModal')).show();
+}
+function submitExpenseDeleteModal() {
+    if (!expenseDeleteContext) return;
+    const errorBox = document.getElementById('expenseDeleteModalError');
+    const btn = document.getElementById('expenseDeleteModalConfirmBtn');
+    errorBox.classList.add('d-none');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting...';
+    const fd = new FormData(); fd.append('_method', 'DELETE');
+    fetch(expenseDeleteContext.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: fd,
+    })
+        .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+        .then(() => {
+            bootstrap.Modal.getInstance(document.getElementById('expenseDeleteModal')).hide();
+            expenseDeleteContext.row?.remove();
+            expenseDeleteContext = null;
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-trash me-1"></i> Delete';
+            errorBox.textContent = err.message || 'Failed to delete expense.';
+            errorBox.classList.remove('d-none');
+        });
+}
+
+
+function submitLeadStatusChange(event, leadId) {
+    event.preventDefault();
+    const form = document.getElementById(`leadStatusForm-${leadId}`);
+    const errorBox = document.getElementById(`leadStatusError-${leadId}`);
+    errorBox.classList.add('d-none');
+
+    const params = new URLSearchParams();
+    new FormData(form).forEach((value, key) => params.append(key, value));
+
+    fetch(form.dataset.url, {
+        method: 'PATCH',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRF-TOKEN': ajaxCsrfToken(),
+        },
+        body: params.toString(),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => {
+            let msg = err.message || 'Failed to update status.';
+            if (err.errors) msg = Object.values(err.errors).flat().join(' ');
+            errorBox.textContent = msg;
+            errorBox.classList.remove('d-none');
+        });
+
+    return false;
+}
+
+document.addEventListener('change', function (e) {
+    if (e.target.classList.contains('vf-lead-status')) {
+        const form = e.target.closest('form');
+        const lostField = form.querySelector('.vf-lead-lost-reason');
+        if (lostField) lostField.style.display = e.target.value === 'lost' ? '' : 'none';
+    }
+});
+
+
+</script>
+
+
+
+
+
+@stack('scripts')
+</body>
+</html>

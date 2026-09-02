@@ -1,0 +1,2786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Dashboard') — {{ $currentTenant->company_name ?? 'AutoDealer' }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --sidebar-bg: #0f172a;
+            --sidebar-hover: #1e293b;
+            --sidebar-active: #2563eb;
+            --sidebar-text: #94a3b8;
+            --sidebar-text-active: #fff;
+            --sidebar-section: #475569;
+            --topbar-h: 60px;
+            --sidebar-w: 240px;
+            --radius: 10px;
+            --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+            --shadow-md: 0 4px 16px rgba(0,0,0,.1);
+        }
+
+        * { box-sizing: border-box; }
+        body { background: #f1f5f9; font-size: 13.5px; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0; color: #1e293b; }
+        a { text-decoration: none; }
+
+        /* ── Layout Shell ── */
+        #layout { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        #sidebar {
+            width: var(--sidebar-w);
+            min-width: var(--sidebar-w);
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 200;
+            transition: transform .25s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        #sidebar::-webkit-scrollbar { width: 4px; }
+        #sidebar::-webkit-scrollbar-track { background: transparent; }
+        #sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+        /* Brand */
+        .sidebar-brand {
+            display: flex; align-items: center; gap: 10px;
+            padding: 18px 16px 16px;
+            border-bottom: 1px solid #1e293b;
+        }
+        .sidebar-brand-icon {
+            width: 34px; height: 34px;
+            background: var(--sidebar-active);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1rem; font-weight: 800; flex-shrink: 0;
+        }
+        .sidebar-brand-text { min-width: 0; }
+        .sidebar-brand-name { color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-brand-sub  { color: var(--sidebar-text); font-size: 10.5px; }
+
+        /* Nav */
+        .sidebar-nav { padding: 12px 10px; flex: 1; }
+        .sidebar-section { color: var(--sidebar-section); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; padding: 14px 8px 4px; font-weight: 600; }
+        .sidebar-link {
+            display: flex; align-items: center; gap: 9px;
+            color: var(--sidebar-text);
+            padding: 8px 10px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: .15s;
+            margin-bottom: 1px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .sidebar-link i { font-size: 15px; width: 18px; flex-shrink: 0; }
+        .sidebar-link:hover { background: var(--sidebar-hover); color: #fff; }
+        .sidebar-link.active { background: var(--sidebar-active); color: #fff; }
+        .sidebar-link .badge-count {
+            margin-left: auto;
+            background: #ef4444;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 20px;
+        }
+
+        /* Collapsible group */
+        .sidebar-group-toggle {
+            display: flex; align-items: center; justify-content: space-between;
+            color: var(--sidebar-text);
+            padding: 8px 10px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: .15s;
+            margin-bottom: 1px;
+            user-select: none;
+        }
+        .sidebar-group-toggle:hover { background: var(--sidebar-hover); color: #fff; }
+        .sidebar-group-toggle .toggle-icon { font-size: 11px; transition: transform .2s; }
+        .sidebar-group-toggle.open .toggle-icon { transform: rotate(180deg); }
+        .sidebar-group-toggle .left { display: flex; align-items: center; gap: 9px; }
+        .sidebar-group-toggle i { font-size: 15px; width: 18px; }
+        .sidebar-sub { padding-left: 10px; overflow: hidden; max-height: 0; transition: max-height .25s ease; }
+        .sidebar-sub.open { max-height: 500px; }
+        .sidebar-sub .sidebar-link { font-size: 12.5px; padding: 6px 10px; }
+        .sidebar-sub .sidebar-link i { font-size: 13px; }
+
+        /* ── Main area ── */
+        #main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+        /* ── Topbar ── */
+        #topbar {
+            height: var(--topbar-h);
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-hamburger { background: none; border: none; color: #64748b; font-size: 1.2rem; cursor: pointer; padding: 4px 6px; border-radius: 6px; display: flex; align-items: center; }
+        .topbar-hamburger:hover { background: #f1f5f9; }
+        .topbar-search {
+            flex: 1; max-width: 380px;
+            display: flex; align-items: center; gap: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0 12px;
+            height: 36px;
+            color: #94a3b8;
+            font-size: 13px;
+            cursor: text;
+        }
+        .topbar-search input { background: none; border: none; outline: none; flex: 1; font-size: 13px; color: #1e293b; }
+        .topbar-search input::placeholder { color: #94a3b8; }
+        .topbar-search .kbd { font-size: 10px; background: #e2e8f0; padding: 1px 5px; border-radius: 4px; color: #64748b; white-space: nowrap; }
+        .topbar-spacer { flex: 1; }
+        .topbar-icon-btn {
+            position: relative;
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            background: none; border: none; cursor: pointer; color: #64748b; font-size: 1.1rem;
+            transition: .15s;
+        }
+        .topbar-icon-btn:hover { background: #f1f5f9; color: #1e293b; }
+        .topbar-icon-btn .dot {
+            position: absolute; top: 4px; right: 4px;
+            width: 8px; height: 8px;
+            background: #ef4444; border-radius: 50%; border: 2px solid #fff;
+        }
+        .topbar-icon-btn .dot-blue { background: #3b82f6; }
+        .topbar-divider { width: 1px; height: 24px; background: #e2e8f0; margin: 0 4px; }
+        .topbar-profile { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: .15s; }
+        .topbar-profile:hover { background: #f1f5f9; }
+        .topbar-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--sidebar-active); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; }
+        .topbar-profile-name { font-size: 13px; font-weight: 600; color: #1e293b; }
+        .topbar-profile-role { font-size: 11px; color: #94a3b8; }
+        .topbar-profile-chevron { color: #94a3b8; font-size: 11px; }
+
+        /* ── Page Content ── */
+        #content { flex: 1; padding: 24px; }
+
+        /* ── Cards ── */
+        .card { border: 1px solid #e2e8f0; border-radius: var(--radius); box-shadow: var(--shadow); }
+        .card-header-clean { padding: 16px 20px 12px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+        .card-header-clean .title { font-size: 14px; font-weight: 700; color: #1e293b; }
+        .card-header-clean .view-all { font-size: 12px; color: #2563eb; font-weight: 600; }
+
+        /* ── KPI Cards ── */
+        .kpi-card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); padding: 18px 20px; display: flex; align-items: flex-start; justify-content: space-between; box-shadow: var(--shadow); }
+        .kpi-label { font-size: 12px; color: #64748b; font-weight: 500; margin-bottom: 4px; }
+        .kpi-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.1; }
+        .kpi-sub { font-size: 11.5px; color: #64748b; margin-top: 4px; }
+        .kpi-trend-up   { color: #16a34a; font-size: 11.5px; font-weight: 600; }
+        .kpi-trend-down { color: #dc2626; font-size: 11.5px; font-weight: 600; }
+        .kpi-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+
+        /* ── Table ── */
+        .table thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #64748b; font-weight: 600; border-bottom: 1px solid #f1f5f9; padding: 10px 16px; background: #fff; }
+        .table tbody td { padding: 12px 16px; vertical-align: middle; border-color: #f8fafc; font-size: 13px; }
+        .table tbody tr:hover td { background: #f8fafc; }
+
+        /* ── Badges ── */
+        .badge { font-weight: 500; font-size: 11px; padding: .3em .65em; }
+        .status-available   { background: #dcfce7; color: #166534; }
+        .status-reserved    { background: #fef3c7; color: #92400e; }
+        .status-sold        { background: #fee2e2; color: #991b1b; }
+        .status-delivered   { background: #dbeafe; color: #1e40af; }
+        .status-pending     { background: #f1f5f9; color: #475569; }
+
+        /* ── Quick Action Buttons ── */
+        .quick-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .qa-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid #e2e8f0; background: #fff; color: #1e293b; transition: .15s; }
+        .qa-btn:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+        .qa-btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+        .qa-btn.primary:hover { background: #1d4ed8; }
+
+        /* ── Activity Feed ── */
+        .activity-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f8fafc; }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; }
+        .activity-content .title { font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 2px; }
+        .activity-content .sub   { font-size: 11.5px; color: #64748b; }
+        .activity-time { font-size: 11px; color: #94a3b8; white-space: nowrap; margin-left: auto; }
+
+        /* ── Pipeline ── */
+        .pipeline-col { background: #f8fafc; border-radius: 8px; padding: 12px; min-width: 0; }
+        .pipeline-col-title { font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+        .pipeline-col-count { font-size: 11px; color: #64748b; margin-bottom: 10px; }
+        .pipeline-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 7px; padding: 10px 12px; margin-bottom: 8px; }
+        .pipeline-card .name { font-size: 13px; font-weight: 600; color: #0f172a; }
+        .pipeline-card .vehicle { font-size: 11.5px; color: #64748b; }
+        .pipeline-card .date { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+        /* ── Donut chart ── */
+        .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+        .donut-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+        .donut-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+        /* ── Bottom stat cards ── */
+        .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); }
+        .stat-card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; float: right; }
+        .stat-card-label { font-size: 12px; color: #64748b; font-weight: 500; }
+        .stat-card-value { font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 4px 0 2px; }
+        .stat-card-sub { font-size: 11.5px; color: #94a3b8; }
+
+        /* ── Misc ── */
+        .required:after { content:" *"; color:#ef4444; }
+        .border-dashed { border-style: dashed !important; }
+        .text-muted { color: #94a3b8 !important; }
+        .fw-600 { font-weight: 600; }
+        .fs-12 { font-size: 12px; }
+        .fs-11 { font-size: 11px; }
+
+        /* ── Responsive ── */
+        @media(max-width:768px){
+            #sidebar { transform: translateX(-100%); }
+            #sidebar.open { transform: translateX(0); }
+            #main { margin-left: 0; }
+            #content { padding: 16px; }
+        }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 199; }
+        .sidebar-overlay.show { display: block; }
+
+        .document-preview-modal {height: 90vh;max-height: 90vh;overflow: hidden;border: 0;border-radius: 14px;}
+        .document-preview-body {min-height: 0;flex: 1 1 auto;overflow: hidden;background: #f1f5f9;}
+        .document-preview-frame {display: block;width: 100%;height: 100%;min-height: 0;border: 0;}
+
+
+
+
+        /* ══════════════════════════════════════════════════════════════
+   TOPBAR ACTION DROPDOWNS
+   ══════════════════════════════════════════════════════════════ */
+
+.topbar-action {
+    position: relative;
+}
+
+.topbar-icon-btn {
+    position: relative;
+}
+
+.topbar-badge {
+    position: absolute;
+    top: 2px;
+    right: 1px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 20px;
+    background: #ef4444;
+    color: #fff;
+    border: 2px solid #fff;
+    font-size: 9px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.topbar-badge-blue {
+    background: #2563eb;
+}
+
+
+/* ── Common dropdown panel ─────────────────────────────────── */
+
+.topbar-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 390px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 15px 45px rgba(15, 23, 42, .15);
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.topbar-panel.open {
+    display: block;
+    animation: topbarPanelIn .15s ease-out;
+}
+
+@keyframes topbarPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ── Panel header ───────────────────────────────────────────── */
+
+.topbar-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.topbar-panel-header > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.topbar-panel-header strong {
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.topbar-panel-header small {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.panel-link {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.panel-link:hover {
+    color: #1d4ed8;
+}
+
+
+/* ── Notifications ─────────────────────────────────────────── */
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    text-decoration: none;
+    border-bottom: 1px solid #f8fafc;
+    transition: background .15s;
+}
+
+.notification-item:hover {
+    background: #f8fafc;
+}
+
+.notification-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+.notification-success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.notification-warning {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.notification-info {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.notification-content strong {
+    color: #1e293b;
+    font-size: 12.5px;
+}
+
+.notification-content span {
+    color: #64748b;
+    font-size: 11.5px;
+}
+
+.notification-content small {
+    color: #94a3b8;
+    font-size: 10.5px;
+    margin-top: 2px;
+}
+
+.notification-unread {
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: #2563eb;
+}
+
+
+/* ── Messages ───────────────────────────────────────────────── */
+
+.message-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 14px 18px;
+    text-decoration: none;
+    border-bottom: 1px solid #f8fafc;
+    transition: background .15s;
+}
+
+.message-item:hover {
+    background: #f8fafc;
+}
+
+.message-avatar {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.message-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.message-content strong {
+    color: #1e293b;
+    font-size: 12.5px;
+}
+
+.message-content span {
+    color: #64748b;
+    font-size: 11.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.message-content small {
+    color: #94a3b8;
+    font-size: 10.5px;
+}
+
+.message-count {
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+
+/* ── Module grid ────────────────────────────────────────────── */
+
+.modules-panel {
+    width: 350px;
+}
+
+.module-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 14px;
+}
+
+.module-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 5px;
+    border-radius: 9px;
+    text-decoration: none;
+    transition: background .15s;
+}
+
+.module-item:hover {
+    background: #f8fafc;
+}
+
+.module-item span {
+    color: #475569;
+    font-size: 10.5px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.module-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+}
+
+.module-blue {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.module-purple {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+.module-green {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.module-orange {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+.module-cyan {
+    background: #cffafe;
+    color: #0891b2;
+}
+
+.module-red {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.module-yellow {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.module-indigo {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+
+/* ── Panel footer ───────────────────────────────────────────── */
+
+.topbar-panel-footer {
+    border-top: 1px solid #f1f5f9;
+    padding: 12px 18px;
+    text-align: center;
+}
+
+.topbar-panel-footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.topbar-panel-footer a:hover {
+    color: #1d4ed8;
+}
+
+
+/* ── Mobile ─────────────────────────────────────────────────── */
+
+@media (max-width: 576px) {
+
+    .topbar-panel {
+        position: fixed;
+        top: 60px;
+        left: 10px;
+        right: 10px;
+        width: auto;
+        max-width: none;
+    }
+
+    .modules-panel {
+        width: auto;
+    }
+
+}
+    </style>
+    @stack('styles')
+</head>
+<body>
+<div id="layout">
+
+{{-- ════════════ SIDEBAR ════════════ --}}
+<aside id="sidebar">
+    {{-- Brand --}}
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+            @if(isset($currentTenant) && $currentTenant->logo_path)
+                <img src="{{ Storage::url($currentTenant->logo_path) }}" style="max-height:20px;">
+            @else
+                <i class="bi bi-car-front"></i>
+            @endif
+        </div>
+        <div class="sidebar-brand-text">
+            <div class="sidebar-brand-name">{{ $currentTenant->company_name ?? 'AutoDealer' }}</div>
+            <div class="sidebar-brand-sub">ERP / CRM System</div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        {{-- Dashboard --}}
+        <a href="{{ route('dashboard') }}" class="sidebar-link @active('dashboard')">
+            <i class="bi bi-grid-1x2-fill"></i> Dashboard
+        </a>
+
+        {{-- INVENTORY --}}
+        <div class="sidebar-section">Inventory</div>
+
+        @can('view-vehicles')
+        <a href="{{ route('vehicles.index') }}" class="sidebar-link @active('vehicles*')">
+            <i class="bi bi-car-front-fill"></i> Vehicles
+        </a>
+        @endcan
+
+        @can('manage-branches')
+        <a href="{{ route('branches.index') }}" class="sidebar-link @active('branches*')">
+            <i class="bi bi-building"></i> Branches
+        </a>
+        @endcan
+
+        {{-- SALES --}}
+        @canany(['view-leads','view-bookings','view-quotations','view-invoices','view-trade-ins'])
+        <div class="sidebar-section">Sales</div>
+
+        @can('view-leads')
+        <a href="{{ route('leads.index') }}" class="sidebar-link @active('leads*')">
+            <i class="bi bi-funnel-fill"></i> Leads
+        </a>
+        @endcan
+
+        @can('view-bookings')
+        <a href="{{ route('bookings.index') }}" class="sidebar-link @active('bookings*')">
+            <i class="bi bi-calendar-check-fill"></i> Bookings
+        </a>
+        @endcan 
+
+        @can('view-quotations')
+        <a href="{{ route('quotations.index') }}" class="sidebar-link @active('quotations*')">
+            <i class="bi bi-file-text-fill"></i> Quotations
+        </a>
+        @endcan
+
+        @can('view-invoices')
+        <a href="{{ route('invoices.index') }}" class="sidebar-link @active('invoices*')">
+            <i class="bi bi-receipt-cutoff"></i> Invoices
+        </a>
+        @endcan
+
+        @can('view-trade-ins')
+        <a href="{{ route('trade-ins.index') }}" class="sidebar-link @active('trade-ins*')">
+            <i class="bi bi-arrow-left-right"></i> Trade-Ins
+        </a>
+        @endcan
+
+        <a href="{{ route('documents.history') }}" class="sidebar-link @active('documents*')">
+            <i class="bi bi-folder-fill"></i> Documents
+        </a>
+        @endcanany
+
+        {{-- CRM --}}
+        @canany(['view-customers','view-leads'])
+        <div class="sidebar-section">CRM</div>
+
+        @can('view-customers')
+        <a href="{{ route('customers.index') }}" class="sidebar-link @active('customers*')">
+            <i class="bi bi-people-fill"></i> Customers
+        </a>
+        @endcan
+
+
+
+        <a href="{{ route('whatsapp.index') }}" class="sidebar-link @active('whatsapp*')">
+            <i class="bi bi-whatsapp"></i> WhatsApp CRM
+        </a>
+        @endcanany
+
+
+
+        {{-- PARTIES --}}
+        <div class="sidebar-section">Parties</div>
+
+        <a href="{{ route('parties.index') }}" class="sidebar-link @active('parties*')">
+            <i class="bi bi-person-lines-fill"></i> Parties
+        </a>
+
+
+
+        {{-- ACCOUNTING --}}
+        @canany(['view-accounts','view-payments','view-expenses','view-vendors'])
+        <div class="sidebar-section">Accounting</div>
+
+        @can('view-accounts')
+        <a href="{{ route('accounts.index') }}" class="sidebar-link @active('accounts*')">
+            <i class="bi bi-journal-text"></i> Chart of Accounts
+        </a>
+        @endcan
+
+        <a href="{{ route('journal-entries.index') }}" class="sidebar-link @active('journal-entries*')">
+            <i class="bi bi-journals"></i> Journal Entries
+        </a>
+
+        @can('view-payments')
+        <a href="{{ route('payments.index') }}" class="sidebar-link @active('payments*')">
+            <i class="bi bi-cash-coin"></i> Payments
+        </a>
+        @endcan
+
+        @can('manage-vendors')
+        <a href="{{ route('vendors.index') }}" class="sidebar-link @active('vendors*')">
+            <i class="bi bi-shop"></i> Vendors
+        </a>
+        @endcan
+
+        @can('view-expenses')
+        <a href="{{ route('expenses.index') }}" class="sidebar-link @active('expenses*')">
+            <i class="bi bi-credit-card-fill"></i> Expenses
+        </a>
+        @endcan
+
+        @can('view-accounting-reports')
+        <a href="{{ route('reports.profit-loss') }}" class="sidebar-link @active('reports*')">
+            <i class="bi bi-bar-chart-fill"></i> Financial Reports
+        </a>
+        @endcan
+
+        @can('view-commissions')
+        <a href="{{ route('commissions.index') }}" class="sidebar-link @active('commissions*')">
+            <i class="bi bi-percent"></i> Commissions
+        </a>
+        @endcan
+        @endcanany
+
+        {{-- ADMIN --}}
+        @canany(['manage-users','manage-roles','manage-branches'])
+        <div class="sidebar-section">Administration</div>
+
+        @can('manage-users')
+        <a href="{{ route('users.index') }}" class="sidebar-link @active('users*')">
+            <i class="bi bi-person-fill-gear"></i> Users
+        </a>
+        @endcan
+
+        @can('manage-roles')
+        <a href="{{ route('roles.index') }}" class="sidebar-link @active('roles*')">
+            <i class="bi bi-shield-fill-check"></i> Roles
+        </a>
+        @endcan
+
+        <a href="#" class="sidebar-link">
+            <i class="bi bi-gear-fill"></i> Settings
+        </a>
+        @endcanany
+
+        {{-- Help --}}
+        <div style="height:16px;"></div>
+        <a href="#" class="sidebar-link">
+            <i class="bi bi-question-circle"></i> Help & Support
+        </a>
+    </nav>
+</aside>
+
+{{-- Overlay (mobile) --}}
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+{{-- ════════════ MAIN ════════════ --}}
+<div id="main">
+
+    {{-- ── Topbar ── --}}
+    <header id="topbar">
+        <button class="topbar-hamburger" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+        </button>
+
+       <div class="topbar-search" id="globalSearchWrapper" style="position:relative;">
+    <i class="bi bi-search" style="font-size:13px;flex-shrink:0;"></i>
+    <input type="text" id="globalSearch"
+           placeholder="Search vehicles, customers, leads..."
+           autocomplete="off"
+           style="background:none;border:none;outline:none;flex:1;font-size:13px;color:#1e293b;">
+    <span class="kbd">Ctrl + /</span>
+    <div id="globalSearchResults" style="
+        display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;
+        background:#fff;border:1px solid #e2e8f0;border-radius:10px;
+        box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:9999;
+        max-height:420px;overflow-y:auto;min-width:420px;">
+    </div>
+</div>
+
+        <div class="topbar-spacer"></div>
+
+       {{-- Notifications --}}
+<div class="topbar-action" id="notificationsWrapper">
+
+    <button
+        type="button"
+        class="topbar-icon-btn"
+        id="notificationsBtn"
+        title="Notifications"
+        aria-expanded="false"
+    >
+        <i class="bi bi-bell"></i>
+        <span class="topbar-badge">3</span>
+    </button>
+
+    <div class="topbar-panel notifications-panel" id="notificationsPanel">
+
+        <div class="topbar-panel-header">
+            <div>
+                <strong>Notifications</strong>
+                <small>Recent activity</small>
+            </div>
+
+            <button type="button" class="panel-link" id="markNotificationsRead">
+                Mark all as read
+            </button>
+        </div>
+
+        <div class="notification-list">
+
+            <a href="{{ route('invoices.index') }}" class="notification-item">
+                <div class="notification-icon notification-success">
+                    <i class="bi bi-receipt"></i>
+                </div>
+
+                <div class="notification-content">
+                    <strong>Invoice activity</strong>
+                    <span>Check your latest invoices.</span>
+                    <small>Recently</small>
+                </div>
+
+                <span class="notification-unread"></span>
+            </a>
+
+            <a href="{{ route('bookings.index') }}" class="notification-item">
+                <div class="notification-icon notification-warning">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+
+                <div class="notification-content">
+                    <strong>Booking activity</strong>
+                    <span>Review your latest bookings.</span>
+                    <small>Recently</small>
+                </div>
+
+                <span class="notification-unread"></span>
+            </a>
+
+           <a href="{{ route('vehicles.index') }}" class="notification-item">
+                <div class="notification-icon notification-info">
+                    <i class="bi bi-car-front"></i>
+                </div>
+
+                <div class="notification-content">
+                    <strong>Inventory</strong>
+                    <span>Review your vehicle inventory.</span>
+                    <small>Recently</small>
+                </div>
+
+                <span class="notification-unread"></span>
+            </a>
+
+        </div>
+
+        <div class="topbar-panel-footer">
+            <a href="{{ route('dashboard') }}">
+                View dashboard
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+
+{{-- Messages --}}
+<div class="topbar-action" id="messagesWrapper">
+
+    <button
+        type="button"
+        class="topbar-icon-btn"
+        id="messagesBtn"
+        title="Messages"
+        aria-expanded="false"
+    >
+        <i class="bi bi-chat-dots"></i>
+        <span class="topbar-badge topbar-badge-blue">2</span>
+    </button>
+
+    <div class="topbar-panel messages-panel" id="messagesPanel">
+
+        <div class="topbar-panel-header">
+            <div>
+                <strong>Messages</strong>
+                <small>Recent conversations</small>
+            </div>
+
+            <a href="{{ route('whatsapp.index') }}" class="panel-link">
+    View all
+</a>
+        </div>
+
+        <div class="message-list">
+
+            <a href="{{ route('whatsapp.index') }}" class="message-item">
+                <div class="message-avatar">
+                    A
+                </div>
+
+                <div class="message-content">
+                    <strong>Automotive ERP</strong>
+                    <span>Please check the latest activity.</span>
+                    <small>2 min ago</small>
+                </div>
+
+                <span class="message-count">1</span>
+            </a>
+
+            <a href="{{ route('whatsapp.index') }}" class="message-item">
+                <div class="message-avatar">
+                    C
+                </div>
+
+                <div class="message-content">
+                    <strong>Customer</strong>
+                    <span>New customer activity.</span>
+                    <small>15 min ago</small>
+                </div>
+
+                <span class="message-count">1</span>
+            </a>
+
+        </div>
+
+        <div class="topbar-panel-footer">
+           <a href="{{ route('whatsapp.index') }}">
+                <i class="bi bi-chat"></i>
+                Open messages
+            </a>
+        </div>
+
+    </div>
+</div>
+
+
+{{-- Quick Access / Modules --}}
+<div class="topbar-action" id="modulesWrapper">
+
+    <button
+        type="button"
+        class="topbar-icon-btn"
+        id="modulesBtn"
+        title="ERP Modules"
+        aria-expanded="false"
+    >
+        <i class="bi bi-grid-3x3-gap-fill"></i>
+    </button>
+
+    <div class="topbar-panel modules-panel" id="modulesPanel">
+
+        <div class="topbar-panel-header">
+            <div>
+                <strong>Quick Access</strong>
+                <small>ERP Modules</small>
+            </div>
+        </div>
+
+        <div class="module-grid">
+
+            <a href="{{ route('dashboard') }}" class="module-item">
+                <div class="module-icon module-blue">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+                <span>Dashboard</span>
+            </a>
+
+           <a href="{{ route('vehicles.index') }}" class="module-item">
+                <div class="module-icon module-purple">
+                    <i class="bi bi-car-front-fill"></i>
+                </div>
+                <span>Vehicles</span>
+            </a>
+
+            <a href="{{ route('parties.index') }}" class="module-item">
+                <div class="module-icon module-green">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <span>Parties</span>
+            </a>
+
+            <a href="{{ route('bookings.index') }}" class="module-item">
+                <div class="module-icon module-orange">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <span>Bookings</span>
+            </a>
+
+            <a href="{{ route('invoices.index') }}" class="module-item">
+                <div class="module-icon module-cyan">
+                    <i class="bi bi-receipt"></i>
+                </div>
+                <span>Invoices</span>
+            </a>
+
+            <a href="{{ route('payments.index') }}" class="module-item">
+                <div class="module-icon module-red">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <span>Payments</span>
+            </a>
+
+            <a href="{{ route('reports.profit-loss') }}" class="module-item">
+                <div class="module-icon module-yellow">
+                    <i class="bi bi-bar-chart-fill"></i>
+                </div>
+                <span>Reports</span>
+            </a>
+
+            <a href="{{ route('users.index') }}" class="module-item">
+                <div class="module-icon module-indigo">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <span>Users</span>
+            </a>
+
+        </div>
+
+        <div class="topbar-panel-footer">
+            <a href="{{ route('dashboard') }}">
+                View all modules
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+        <div class="topbar-divider"></div>
+
+        {{-- Profile dropdown --}}
+        <div class="dropdown">
+            <div class="topbar-profile" data-bs-toggle="dropdown">
+                <div class="topbar-avatar">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                </div>
+                <div>
+                    <div class="topbar-profile-name">{{ auth()->user()->name ?? 'User' }}</div>
+                    <div class="topbar-profile-role">{{ auth()->user()->getRoleNames()->first() ?? 'Administrator' }}</div>
+                </div>
+                <i class="bi bi-chevron-down topbar-profile-chevron ms-1"></i>
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1" style="min-width:180px;border-radius:10px;">
+                <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2 text-muted"></i>My Profile</a></li>
+                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2 text-muted"></i>Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="bi bi-box-arrow-right me-2"></i>Sign Out
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    {{-- ── Flash Messages ── --}}
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show mx-4 mt-3 mb-0 py-2 px-3" role="alert" style="font-size:13px;border-radius:8px;">
+        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show mx-4 mt-3 mb-0 py-2 px-3" role="alert" style="font-size:13px;border-radius:8px;">
+        <i class="bi bi-exclamation-circle me-2"></i>{{ session('error') }}
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
+
+    {{-- ── Page Content ── --}}
+    <main id="content">
+        @yield('content')
+    </main>
+
+</div>{{-- /main --}}
+</div>{{-- /layout --}}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── Sidebar toggle (mobile) ──────────────────────────────────
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+// ── Auto-dismiss flash messages ─────────────────────────────
+setTimeout(() => {
+    document.querySelectorAll('.alert-dismissible').forEach(el => {
+        const bs = bootstrap.Alert.getOrCreateInstance(el);
+        if (bs) bs.close();
+    });
+}, 4000);
+
+// ── CSRF for fetch ───────────────────────────────────────────
+function ajaxCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : '';
+}
+
+// ── Generic AJAX modal submit helper ────────────────────────
+function genericSubmitForm(formSelector, { onSuccess, onError, buttonEl, busyText, idleHtml }) {
+    const form = document.querySelector(formSelector);
+    if (!form) return;
+    if (buttonEl) { buttonEl.disabled = true; buttonEl.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> ${busyText || 'Saving...'}`; }
+    fetch(form.action || form.dataset.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form),
+    })
+    .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+    .then(data => onSuccess(data))
+    .catch(err => {
+        if (buttonEl) { buttonEl.disabled = false; buttonEl.innerHTML = idleHtml || 'Save'; }
+        let msg = err.message || 'Something went wrong.';
+        if (err.errors) msg = Object.values(err.errors).flat().join(' ');
+        onError(msg);
+    });
+}
+
+// ── Vehicle Edit Form init ───────────────────────────────────
+window.initVehicleEditForm = function (scope) {
+    scope = scope || document;
+    const form = scope.querySelector('#vehicleForm');
+    if (!form || form.dataset.initialized) return;
+    form.dataset.initialized = '1';
+    const makeSelect    = form.querySelector('.vf-make-select');
+    const modelSelect   = form.querySelector('.vf-model-select');
+    const variantSelect = form.querySelector('.vf-variant-select');
+    const importStatus  = form.querySelector('.vf-import-status');
+    const auctionField  = form.querySelector('.vf-auction-grade-field');
+    const purchaseInput = form.querySelector('.vf-purchase-price');
+    const repairInput   = form.querySelector('.vf-repair-cost');
+    const miscInput     = form.querySelector('.vf-misc-cost');
+    const saleInput     = form.querySelector('.vf-sale-price');
+    const totalDisplay  = form.querySelector('.vf-total-cost-display');
+    const profitDisplay = form.querySelector('.vf-profit-display');
+    const profitBox     = form.querySelector('.vf-profit-box');
+    const landingCost   = parseFloat(form.dataset.landingCost || 0);
+    const savedMakeId   = form.dataset.makeId;
+    const savedModelId  = form.dataset.modelId;
+    const savedVariantId= form.dataset.variantId;
+
+    function parsePkr(v) { return parseFloat(String(v).replace(/,/g,'')) || 0; }
+    function recalculate() {
+        const purchase = parsePkr(purchaseInput?.value);
+        const repair   = parsePkr(repairInput?.value);
+        const misc     = parsePkr(miscInput?.value);
+        const total    = purchase + landingCost + repair + misc;
+        const sale     = parsePkr(saleInput?.value);
+        const profit   = sale - total;
+        if (totalDisplay) totalDisplay.textContent = 'PKR ' + Math.round(total).toLocaleString('en-PK');
+        if (profitDisplay) {
+            profitDisplay.textContent = 'PKR ' + Math.round(profit).toLocaleString('en-PK');
+            profitDisplay.style.color = profit >= 0 ? '#16a34a' : '#dc2626';
+        }
+        if (profitBox) profitBox.style.background = profit >= 0 ? '#f0fdf4' : '#fef2f2';
+    }
+    [purchaseInput, repairInput, miscInput, saleInput].forEach(el => el?.addEventListener('input', recalculate));
+    recalculate();
+
+    if (importStatus && auctionField) {
+        const toggle = () => auctionField.style.display = ['auction','direct_import'].includes(importStatus.value) ? '' : 'none';
+        importStatus.addEventListener('change', toggle); toggle();
+    }
+
+    async function loadModels(makeId, selectedModelId) {
+        if (!makeId) { modelSelect.innerHTML = '<option value="">Select Model</option>'; variantSelect.innerHTML = '<option value="">No Variant</option>'; return; }
+        try {
+            const r = await fetch(`/vehicles/models?make_id=${makeId}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const models = await r.json();
+            modelSelect.innerHTML = '<option value="">Select Model</option>' + models.map(m => `<option value="${m.id}" ${m.id==selectedModelId?'selected':''}>${m.name}</option>`).join('');
+            if (selectedModelId) await loadVariants(selectedModelId, savedVariantId);
+        } catch(e) {}
+    }
+    async function loadVariants(modelId, selectedVariantId) {
+        if (!modelId) { variantSelect.innerHTML = '<option value="">No Variant</option>'; return; }
+        try {
+            const r = await fetch(`/vehicles/variants?model_id=${modelId}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const variants = await r.json();
+            variantSelect.innerHTML = '<option value="">No Variant</option>' + variants.map(v => `<option value="${v.id}" ${v.id==selectedVariantId?'selected':''}>${v.name}</option>`).join('');
+        } catch(e) {}
+    }
+    makeSelect?.addEventListener('change', function() { loadModels(this.value, null); });
+    modelSelect?.addEventListener('change', function() { loadVariants(this.value, null); });
+    if (savedMakeId) loadModels(savedMakeId, savedModelId);
+};
+
+window.initInvoiceForm = function (scope) {
+    scope = scope || document;
+    const form = scope.querySelector('#invoiceForm');
+    if (!form || form.dataset.initialized) return;
+    form.dataset.initialized = '1';
+    const vehicleSelect = form.querySelector('.vf-inv-vehicle');
+    const saleInput     = form.querySelector('.vf-inv-sale');
+    const discInput     = form.querySelector('.vf-inv-discount');
+    const whtInput      = form.querySelector('.vf-inv-wht');
+    const paidInput     = form.querySelector('.vf-inv-paid');
+    const netHidden     = form.querySelector('.vf-inv-net');
+    const netDisplay    = form.querySelector('.vf-inv-net-display');
+    const balanceDisplay= form.querySelector('.vf-inv-balance-display');
+    const payType       = form.querySelector('.vf-inv-paytype');
+    const paidBox       = form.querySelector('.vf-inv-paid-box');
+    function recalc() {
+        const sale = parseFloat(saleInput?.value) || 0;
+        const disc = parseFloat(discInput?.value) || 0;
+        const wht  = parseFloat(whtInput?.value)  || 0;
+        const paid = parseFloat(paidInput?.value)  || 0;
+        const net  = sale - disc - wht;
+        const balance = Math.max(0, net - paid);
+        if (netHidden)      netHidden.value = net.toFixed(2);
+        if (netDisplay)     netDisplay.textContent = 'PKR ' + Math.round(net).toLocaleString('en-PK');
+        if (balanceDisplay) balanceDisplay.textContent = 'PKR ' + Math.round(balance).toLocaleString('en-PK');
+    }
+    [saleInput, discInput, whtInput, paidInput].forEach(el => el?.addEventListener('input', recalc));
+    vehicleSelect?.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        if (opt.dataset.price) { saleInput.value = opt.dataset.price; recalc(); }
+    });
+  payType?.addEventListener('change', function() {
+    if (paidBox) {
+        paidBox.style.display = this.value === 'cash' ? 'none' : '';
+    }
+});
+    recalc();
+};
+
+window.initPaymentForm = function (scope) {
+    scope = scope || document;
+    const form = scope.querySelector('#paymentForm');
+    if (!form || form.dataset.initialized) return;
+    form.dataset.initialized = '1';
+    const partyType = form.querySelector('.vf-pay-party-type');
+    const custSel   = form.querySelector('.vf-pay-party-customer');
+    const vendSel   = form.querySelector('.vf-pay-party-vendor');
+    const empSel    = form.querySelector('.vf-pay-party-employee');
+    const otherIn   = form.querySelector('.vf-pay-party-other');
+    function togglePartySelectors() {
+        const val = partyType?.value;
+        [custSel, vendSel, empSel, otherIn].forEach(el => { if (el) { el.style.display = 'none'; el.disabled = true; } });
+        const map = { customer: custSel, vendor: vendSel, employee: empSel, other: otherIn };
+        const active = map[val];
+        if (active) { active.style.display = ''; active.disabled = false; }
+    }
+    partyType?.addEventListener('change', togglePartySelectors);
+    togglePartySelectors();
+};
+
+window.initVehicleDetailTabs = function (scope) {
+    scope = scope || document;
+    if (scope === document) {
+        const hash = window.location.hash;
+        if (hash) { const tabEl = scope.querySelector(`[href="${hash}"]`); if (tabEl) new bootstrap.Tab(tabEl).show(); }
+    }
+};
+
+// ── Vehicle Images ───────────────────────────────────────────
+function submitVehicleImageUpload() {
+    const form = document.getElementById('vehicleImageUploadForm');
+    const input = document.getElementById('vehicleImageInput');
+    if (!input?.files.length) return;
+    fetch(form.action, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: new FormData(form) })
+    .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+    .then(() => window.location.reload())
+    .catch(err => alert(err.message || 'Upload failed.'));
+}
+
+
+function uploadVehicleImages(vehicleId) {
+    const input = document.getElementById('vehicleImagesInput');
+
+    if (!input || !input.files.length) {
+        alert('Please select at least one image.');
+        return;
+    }
+
+    const files = Array.from(input.files);
+
+    if (files.length > 10) {
+        alert('You can upload a maximum of 10 images at a time.');
+        return;
+    }
+
+    for (const file of files) {
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            alert(`${file.name}: Only JPG, PNG or WEBP images are allowed.`);
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert(`${file.name}: Maximum file size is 5 MB.`);
+            return;
+        }
+    }
+
+    const formData = new FormData();
+
+    files.forEach(file => {
+        formData.append('images[]', file);
+    });
+
+    fetch(`/vehicles/${vehicleId}/images`, {
+    method: 'POST',
+    headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') || {}).content || ''
+    },
+    body: formData
+})
+    .then(async response => {
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw data;
+        }
+
+        return data;
+    })
+    .then(data => {
+        alert(data.message || 'Images uploaded successfully.');
+        window.location.reload();
+    })
+    .catch(error => {
+        let message = error.message || 'Failed to upload images.';
+
+        if (error.errors) {
+            message = Object.values(error.errors)
+                .flat()
+                .join('\n');
+        }
+
+        alert(message);
+    });
+}
+
+
+
+
+function setFeaturedVehicleImage(vehicleId, mediaId) {
+    fetch(`/vehicles/${vehicleId}/images/${mediaId}/feature`, { method: 'PATCH', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() } })
+    .then(r => r.json()).then(() => window.location.reload()).catch(() => alert('Failed.'));
+}
+
+function deleteVehicleImage(vehicleId, mediaId) {
+    if (!confirm('Remove this photo?')) return;
+
+    fetch(`/vehicles/${vehicleId}/images/${mediaId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': ajaxCsrfToken()
+        }
+    })
+    .then(r => r.json())
+    .then(() => window.location.reload())
+    .catch(() => alert('Failed to remove photo.'));
+}
+
+function updateSelectedVehicleImages() {
+    const checkboxes = document.querySelectorAll('.vehicle-image-checkbox');
+    const selected = document.querySelectorAll('.vehicle-image-checkbox:checked');
+
+    const countEl = document.getElementById('selectedVehicleImagesCount');
+    const deleteBtn = document.getElementById('deleteSelectedVehicleImagesBtn');
+
+    if (countEl) {
+        countEl.textContent = `${selected.length} selected`;
+    }
+
+    if (deleteBtn) {
+        deleteBtn.disabled = selected.length === 0;
+    }
+}
+
+function selectAllVehicleImages() {
+    const checkboxes = document.querySelectorAll('.vehicle-image-checkbox');
+
+    const allSelected =
+        checkboxes.length > 0 &&
+        Array.from(checkboxes).every(cb => cb.checked);
+
+    checkboxes.forEach(cb => {
+        cb.checked = !allSelected;
+    });
+
+    updateSelectedVehicleImages();
+}
+
+async function deleteSelectedVehicleImages() {
+    const selected = Array.from(
+        document.querySelectorAll('.vehicle-image-checkbox:checked')
+    );
+
+    if (!selected.length) {
+        return;
+    }
+
+    if (!confirm(`Remove ${selected.length} selected photo(s)?`)) {
+        return;
+    }
+
+    const csrfToken =
+    document.querySelector('meta[name="csrf-token"]')
+        ? document.querySelector('meta[name="csrf-token"]').content
+        : '';
+    try {
+        for (const checkbox of selected) {
+            const mediaId = checkbox.value;
+            const vehicleId = checkbox.dataset.vehicleId;
+
+            const response = await fetch(
+                `/vehicles/${vehicleId}/images/${mediaId}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Failed to delete image ${mediaId}`);
+            }
+        }
+
+        window.location.reload();
+
+    } catch (error) {
+        console.error(error);
+        alert('Some images could not be deleted. Please try again.');
+    }
+}
+
+// ── Vehicle Status Change ────────────────────────────────────
+function submitVehicleStatusChange(event, vehicleId) {
+    event.preventDefault();
+    const form = document.getElementById(`statusForm-${vehicleId}`);
+    const errorBox = document.getElementById(`statusFormError-${vehicleId}`);
+    if (errorBox) errorBox.classList.add('d-none');
+    const params = new URLSearchParams();
+    new FormData(form).forEach((value, key) => params.append(key, value));
+    fetch(form.dataset.url, { method: 'PATCH', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-TOKEN': ajaxCsrfToken() }, body: params.toString() })
+    .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+    .then(() => window.location.reload())
+    .catch(err => { if (errorBox) { errorBox.textContent = err.message || 'Failed.'; errorBox.classList.remove('d-none'); } });
+    return false;
+}
+
+// ── Document verify / delete ─────────────────────────────────
+function verifyVehicleDocument(vehicleId, documentId) {
+    fetch(`/vehicles/${vehicleId}/documents/${documentId}/verify`, { method: 'PATCH', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() } })
+    .then(r => r.json()).then(() => window.location.reload()).catch(() => alert('Failed.'));
+}
+function deleteVehicleDocument(vehicleId, documentId) {
+    if (!confirm('Remove this document?')) return;
+    fetch(`/vehicles/${vehicleId}/documents/${documentId}`, { method: 'DELETE', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() } })
+    .then(r => r.json()).then(() => window.location.reload()).catch(() => alert('Failed.'));
+}
+
+// ── QR Regenerate ────────────────────────────────────────────
+function regenerateVehicleQr(vehicleId) {
+    if (!confirm('Regenerate QR code? The old one will stop working.')) return;
+    fetch(`/vehicles/${vehicleId}/qr/regenerate`, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() } })
+    .then(r => r.json()).then(() => window.location.reload()).catch(() => alert('Failed.'));
+}
+
+// ── Document batch upload ────────────────────────────────────
+let documentRowCounter = 0;
+function addDocumentRow(vehicleId, buttonEl) {
+    const docTypes = JSON.parse(buttonEl.dataset.docTypes || '{}');
+    const expirableTypes = JSON.parse(buttonEl.dataset.expirableTypes || '[]');
+    const rowId = 'docrow-' + (++documentRowCounter);
+    let typeOptions = '<option value="">Document Type</option>';
+    for (const [key, label] of Object.entries(docTypes)) typeOptions += `<option value="${key}">${label}</option>`;
+    const row = document.createElement('div');
+    row.className = 'row g-2 align-items-start mb-2 pb-2 border-bottom';
+    row.id = rowId;
+    row.innerHTML = `<div class="col-md-3"><select class="form-select form-select-sm doc-type-select" required>${typeOptions}</select></div>
+    <div class="col-md-2 doc-label-field" style="display:none;"><input type="text" class="form-control form-control-sm doc-label-input" placeholder="Label"></div>
+    <div class="col-md-2 doc-expiry-field" style="display:none;"><input type="date" class="form-control form-control-sm doc-expiry-input"></div>
+    <div class="col-md-3"><input type="file" class="form-control form-control-sm doc-file-input" accept=".pdf,.jpg,.jpeg,.png,.webp" required></div>
+    <div class="col-md-1"><div class="form-check mt-1"><input class="form-check-input doc-original-input" type="checkbox"><label class="form-check-label small">Original</label></div></div>
+    <div class="col-md-1"><button type="button" class="btn btn-light btn-sm text-danger" onclick="removeDocumentRow('${rowId}','${vehicleId}')"><i class="bi bi-x-lg"></i></button></div>`;
+    document.getElementById(`documentRows-${vehicleId}`).appendChild(row);
+    const typeSelect = row.querySelector('.doc-type-select');
+    typeSelect.addEventListener('change', function() {
+        row.querySelector('.doc-label-field').style.display = this.value === 'other' ? '' : 'none';
+        row.querySelector('.doc-expiry-field').style.display = expirableTypes.includes(this.value) ? '' : 'none';
+    });
+    document.getElementById(`documentRowsEmpty-${vehicleId}`)?.classList.add('d-none');
+    document.getElementById(`documentUploadAllWrap-${vehicleId}`)?.classList.remove('d-none');
+}
+function removeDocumentRow(rowId, vehicleId) {
+    document.getElementById(rowId)?.remove();
+    if (document.getElementById(`documentRows-${vehicleId}`)?.children.length === 0) {
+        document.getElementById(`documentUploadAllWrap-${vehicleId}`)?.classList.add('d-none');
+        document.getElementById(`documentRowsEmpty-${vehicleId}`)?.classList.remove('d-none');
+    }
+}
+function submitAllDocuments(vehicleId) {
+    const form = document.getElementById(`documentBatchForm-${vehicleId}`);
+    const rowsContainer = document.getElementById(`documentRows-${vehicleId}`);
+    const errorBox = document.getElementById(`documentBatchError-${vehicleId}`);
+    if (errorBox) errorBox.classList.add('d-none');
+    const fd = new FormData();
+    fd.append('_token', ajaxCsrfToken());
+    let valid = true;
+    Array.from(rowsContainer.children).forEach((row, i) => {
+        const type = row.querySelector('.doc-type-select').value;
+        const file = row.querySelector('.doc-file-input').files[0];
+        if (!type || !file) { valid = false; return; }
+        fd.append(`documents[${i}][document_type]`, type);
+        fd.append(`documents[${i}][file]`, file);
+        const label = row.querySelector('.doc-label-input')?.value || '';
+        const expiry = row.querySelector('.doc-expiry-input')?.value || '';
+        const original = row.querySelector('.doc-original-input').checked;
+        if (label) fd.append(`documents[${i}][document_label]`, label);
+        if (expiry) fd.append(`documents[${i}][expiry_date]`, expiry);
+        fd.append(`documents[${i}][is_original]`, original ? '1' : '0');
+    });
+    if (!valid) { if (errorBox) { errorBox.textContent = 'Please select type and file for every row.'; errorBox.classList.remove('d-none'); } return; }
+    fetch(form.dataset.url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd })
+    .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+    .then(() => window.location.reload())
+    .catch(err => { if (errorBox) { errorBox.textContent = err.message || 'Upload failed.'; errorBox.classList.remove('d-none'); } });
+}
+
+// ── Transfer actions ─────────────────────────────────────────
+function submitVehicleTransferInitiate(event, vehicleId) {
+    event.preventDefault();
+    const form = document.getElementById(`transferInitiateForm-${vehicleId}`);
+    const errorBox = document.getElementById(`transferInitiateError-${vehicleId}`);
+    if (errorBox) errorBox.classList.add('d-none');
+    fetch(form.dataset.url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: new FormData(form) })
+    .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+    .then(() => window.location.reload())
+    .catch(err => { if (errorBox) { errorBox.textContent = err.message || 'Failed.'; errorBox.classList.remove('d-none'); } });
+    return false;
+}
+function respondToVehicleTransfer(transferId, action) {
+    let body = null;
+    if (action === 'reject') { const reason = prompt('Reason for rejecting:', 'Rejected'); if (reason === null) return; body = new URLSearchParams({ reason }).toString(); }
+    fetch(`/vehicles/transfers/${transferId}/${action}`, { method: 'PATCH', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken(), ...(body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}) }, body })
+    .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+    .then(() => window.location.reload())
+    .catch(err => alert(err.message || 'Failed.'));
+}
+
+// ── Lead status change ───────────────────────────────────────
+function submitLeadStatusChange(event, leadId) {
+    event.preventDefault();
+    const form = document.getElementById(`leadStatusForm-${leadId}`);
+    const errorBox = document.getElementById(`leadStatusError-${leadId}`);
+    if (errorBox) errorBox.classList.add('d-none');
+    const params = new URLSearchParams();
+    new FormData(form).forEach((value, key) => params.append(key, value));
+    fetch(form.dataset.url, { method: 'PATCH', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-TOKEN': ajaxCsrfToken() }, body: params.toString() })
+    .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+    .then(() => window.location.reload())
+    .catch(err => { if (errorBox) { errorBox.textContent = err.message || 'Failed.'; errorBox.classList.remove('d-none'); } });
+    return false;
+}
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('vf-lead-status')) {
+        const form = e.target.closest('form');
+        const lostField = form?.querySelector('.vf-lead-lost-reason');
+        if (lostField) lostField.style.display = e.target.value === 'lost' ? '' : 'none';
+    }
+});
+
+// ── Quotation status ─────────────────────────────────────────
+function updateQuotationStatus(id, status) {
+    fetch(`/quotations/${id}/status`, { method: 'PATCH', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': ajaxCsrfToken() }, body: JSON.stringify({ status }) })
+    .then(r => r.json()).then(() => window.location.reload()).catch(() => alert('Failed to update status.'));
+}
+
+// ── Booking cancel ───────────────────────────────────────────
+let bookingCancelId = null;
+function openBookingCancelModal(id) {
+    bookingCancelId = id;
+    bootstrap.Modal.getInstance(document.getElementById('bookingViewModal'))?.hide();
+    new bootstrap.Modal(document.getElementById('bookingCancelModal')).show();
+}
+function submitBookingCancel() {
+    const reason = document.getElementById('bookingCancelReason').value;
+    if (!reason) { alert('Please enter a cancellation reason.'); return; }
+    fetch(`/bookings/${bookingCancelId}/cancel`, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': ajaxCsrfToken() }, body: JSON.stringify({ reason }) })
+    .then(r => r.json()).then(() => window.location.reload()).catch(() => alert('Failed.'));
+}
+
+// ── Invoice payment ──────────────────────────────────────────
+function submitInvoicePayment(invoiceId) {
+    genericSubmitForm('#invoicePaymentForm', {
+        onSuccess: () => window.location.reload(),
+        onError: msg => { const box = document.getElementById('invoicePaymentError'); if (box) { box.textContent = msg; box.classList.remove('d-none'); } },
+    });
+}
+
+// ── Trade-in approval ────────────────────────────────────────
+function submitTradeInApproval(id) {
+    const value = document.getElementById('tradeInApprovedValue' + id)?.value;
+    fetch(`/trade-ins/${id}/approve`, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': ajaxCsrfToken() }, body: JSON.stringify({ approved_value: value }) })
+    .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+    .then(() => window.location.reload())
+    .catch(err => { const box = document.getElementById('tradeInApproveError'); if (box) { box.textContent = err.message || 'Failed.'; box.classList.remove('d-none'); } });
+}
+
+// ── Document view (iframe) ───────────────────────────────────
+function openDocumentViewModal(url) {
+    document.getElementById('documentViewFrame').src = url;
+    new bootstrap.Modal(document.getElementById('documentViewModal')).show();
+}
+
+// ── Global Search ────────────────────────────────────────────
+(function() {
+    const input   = document.getElementById('globalSearch');
+    const results = document.getElementById('globalSearchResults');
+    if (!input || !results) return;
+
+    let debounce;
+    const typeLabels = { vehicle: 'Vehicle', customer: 'Customer', lead: 'Lead', invoice: 'Invoice' };
+
+    input.addEventListener('input', function() {
+        clearTimeout(debounce);
+        const q = this.value.trim();
+        if (q.length < 2) { results.style.display = 'none'; return; }
+        debounce = setTimeout(() => doSearch(q), 220);
+    });
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { results.style.display = 'none'; this.value = ''; }
+        if (e.key === 'Enter') {
+            const first = results.querySelector('a');
+            if (first) window.location = first.href;
+        }
+        // Arrow key navigation
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            const items = Array.from(results.querySelectorAll('a'));
+            const current = results.querySelector('a:focus');
+            const idx = items.indexOf(current);
+            const next = e.key === 'ArrowDown' ? items[idx + 1] || items[0] : items[idx - 1] || items[items.length - 1];
+            next?.focus();
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!document.getElementById('globalSearchWrapper').contains(e.target)) {
+            results.style.display = 'none';
+        }
+    });
+
+    // Ctrl + / keyboard shortcut
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+            e.preventDefault();
+            input.focus();
+            input.select();
+        }
+    });
+
+    async function doSearch(q) {
+        results.innerHTML = '<div style="padding:16px;text-align:center;color:#94a3b8;font-size:13px;"><span class="spinner-border spinner-border-sm me-2"></span>Searching...</div>';
+        results.style.display = 'block';
+        try {
+            const res = await fetch(`/search?q=${encodeURIComponent(q)}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await res.json();
+            renderResults(data.results, q);
+        } catch(e) {
+            results.innerHTML = '<div style="padding:16px;text-align:center;color:#ef4444;font-size:13px;">Search failed. Try again.</div>';
+        }
+    }
+
+    function renderResults(items, q) {
+        if (items.length === 0) {
+            results.innerHTML = `<div style="padding:24px;text-align:center;">
+                <div style="font-size:1.5rem;margin-bottom:8px;">🔍</div>
+                <div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:4px;">No results for "${q}"</div>
+                <div style="font-size:12px;color:#94a3b8;">Try a different name, phone, stock number, or chassis number</div>
+            </div>`;
+            return;
+        }
+
+        // Group by type
+        const grouped = {};
+        items.forEach(item => {
+            if (!grouped[item.type]) grouped[item.type] = [];
+            grouped[item.type].push(item);
+        });
+
+        let html = '';
+        for (const [type, list] of Object.entries(grouped)) {
+            html += `<div style="padding:8px 14px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;">${typeLabels[type] || type}s</div>`;
+            list.forEach(item => {
+                html += `<a href="${item.url}" style="display:flex;align-items:center;gap:12px;padding:10px 14px;text-decoration:none;color:#1e293b;transition:.1s;outline:none;"
+                    onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''"
+                    onfocus="this.style.background='#f8fafc'" onblur="this.style.background=''">
+                    <div style="width:34px;height:34px;border-radius:8px;background:${item.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="bi ${item.icon}" style="color:${item.color};font-size:15px;"></i>
+                    </div>
+                    <div style="min-width:0;">
+                        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${highlightMatch(item.title, q)}</div>
+                        <div style="font-size:11.5px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.sub}</div>
+                    </div>
+                    <i class="bi bi-arrow-up-right" style="margin-left:auto;color:#cbd5e1;font-size:12px;flex-shrink:0;"></i>
+                </a>`;
+            });
+        }
+
+        html += `<div style="padding:10px 14px;border-top:1px solid #f1f5f9;font-size:12px;color:#94a3b8;display:flex;justify-content:space-between;">
+            <span>${items.length} result${items.length !== 1 ? 's' : ''}</span>
+            <span>↑↓ navigate · Enter to open · Esc to close</span>
+        </div>`;
+
+        results.innerHTML = html;
+    }
+
+    function highlightMatch(text, q) {
+        if (!q) return text;
+        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark style="background:#fef9c3;border-radius:2px;padding:0 1px;">$1</mark>');
+    }
+})();
+window.initVehicleEditForm = function (scope) {
+    scope = scope || document;
+    const form = scope.querySelector('#vehicleForm');
+    if (!form || form.dataset.initialized) return;
+    form.dataset.initialized = '1';
+
+    const currentModelId   = form.dataset.modelId;
+    const currentVariantId = form.dataset.variantId;
+    const landingCost      = parseFloat(form.dataset.landingCost) || 0;
+
+    const makeSelect     = form.querySelector('.vf-make-select');
+    const modelSelect     = form.querySelector('.vf-model-select');
+    const variantSelect   = form.querySelector('.vf-variant-select');
+    const importStatus    = form.querySelector('.vf-import-status');
+    const auctionField    = form.querySelector('.vf-auction-grade-field');
+    const purchaseInput   = form.querySelector('.vf-purchase-price');
+    const repairInput     = form.querySelector('.vf-repair-cost');
+    const miscInput       = form.querySelector('.vf-misc-cost');
+    const saleInput       = form.querySelector('.vf-sale-price');
+    const totalCostEl     = form.querySelector('.vf-total-cost-display');
+    const profitEl        = form.querySelector('.vf-profit-display');
+    const profitBox       = form.querySelector('.vf-profit-box');
+
+    makeSelect?.addEventListener('change', function () {
+        const makeId = this.value;
+        modelSelect.innerHTML   = '<option value="">Loading...</option>';
+        variantSelect.innerHTML = '<option value="">No Variant</option>';
+
+        if (!makeId) { modelSelect.innerHTML = '<option value="">Select Model</option>'; return; }
+
+        fetch(`/ajax/vehicle-models?make_id=${makeId}`)
+            .then(r => r.json())
+            .then(models => {
+                modelSelect.innerHTML = '<option value="">Select Model</option>';
+                models.forEach(m => {
+                    const sel = m.id == currentModelId ? 'selected' : '';
+                    modelSelect.innerHTML += `<option value="${m.id}" ${sel}>${m.name}</option>`;
+                });
+            });
+    });
+
+    modelSelect?.addEventListener('change', function () {
+        const modelId = this.value;
+        variantSelect.innerHTML = '<option value="">Loading...</option>';
+
+        if (!modelId) { variantSelect.innerHTML = '<option value="">No Variant</option>'; return; }
+
+        fetch(`/ajax/vehicle-variants?model_id=${modelId}`)
+            .then(r => r.json())
+            .then(variants => {
+                variantSelect.innerHTML = '<option value="">No Variant</option>';
+                variants.forEach(v => {
+                    const sel = v.id == currentVariantId ? 'selected' : '';
+                    variantSelect.innerHTML += `<option value="${v.id}" ${sel}>${v.name}</option>`;
+                });
+            });
+    });
+
+    importStatus?.addEventListener('change', function () {
+        auctionField.style.display = ['imported', 'auction'].includes(this.value) ? '' : 'none';
+    });
+
+    function formatPKR(val) { return 'PKR ' + Math.round(val).toLocaleString('en-PK'); }
+    function parseNum(el) { return parseFloat(el?.value.replace(/,/g, '') || 0) || 0; }
+
+    function recalculate() {
+        const purchase  = parseNum(purchaseInput);
+        const repair    = parseNum(repairInput);
+        const misc      = parseNum(miscInput);
+        const sale      = parseNum(saleInput);
+        const totalCost = purchase + repair + misc + landingCost;
+        const profit    = sale - totalCost;
+
+        if (totalCostEl) totalCostEl.textContent = formatPKR(totalCost);
+        if (profitEl) profitEl.textContent = formatPKR(profit);
+        if (profitBox) profitBox.style.background = profit >= 0 ? '#f0fdf4' : '#fef2f2';
+        if (profitEl) profitEl.className = `fw-bold ${profit >= 0 ? 'text-success' : 'text-danger'} vf-profit-display`;
+    }
+
+    [purchaseInput, repairInput, miscInput, saleInput].forEach(el => {
+        el?.addEventListener('input', recalculate);
+    });
+
+    recalculate();
+};
+
+window.initInvoiceForm = function (scope) {
+    scope = scope || document;
+    const form = scope.querySelector('#invoiceForm');
+    if (!form || form.dataset.initialized) return;
+    form.dataset.initialized = '1';
+
+    const vehicleSelect = form.querySelector('.vf-inv-vehicle');
+    const saleInput     = form.querySelector('.vf-inv-sale');
+    const discInput     = form.querySelector('.vf-inv-discount');
+    const whtInput      = form.querySelector('.vf-inv-wht');
+    const paidInput     = form.querySelector('.vf-inv-paid');
+    const paidBox       = form.querySelector('.vf-inv-paid-box');
+    const netHidden      = form.querySelector('.vf-inv-net');
+    const netDisplay     = form.querySelector('.vf-inv-net-display');
+    const balanceDisplay = form.querySelector('.vf-inv-balance-display');
+    const payType        = form.querySelector('.vf-inv-paytype');
+
+    function recalc() {
+        const sale = parseFloat(saleInput.value) || 0;
+        const disc = parseFloat(discInput.value) || 0;
+        const wht  = parseFloat(whtInput.value)  || 0;
+        const paid = parseFloat(paidInput.value) || 0;
+        const net  = sale - disc - wht;
+        const balance = Math.max(0, net - paid);
+
+        netHidden.value = net.toFixed(2);
+        netDisplay.textContent = 'PKR ' + Math.round(net).toLocaleString('en-PK');
+        balanceDisplay.textContent = 'PKR ' + Math.round(balance).toLocaleString('en-PK');
+    }
+
+    [saleInput, discInput, whtInput, paidInput].forEach(el => el?.addEventListener('input', recalc));
+
+    vehicleSelect?.addEventListener('change', function () {
+        const opt = this.options[this.selectedIndex];
+        if (opt.dataset.price) { saleInput.value = opt.dataset.price; recalc(); }
+    });
+
+    payType?.addEventListener('change', function () {
+       paidBox.style.display = '';
+    });
+
+    recalc();
+};
+
+// ══════════════════════════ Generic AJAX modal helpers ══════════════════════════
+// function ajaxCsrfToken() {
+//     const meta = document.querySelector('meta[name="csrf-token"]');
+//     return meta ? meta.content : '';
+// }
+
+function genericSubmitForm(formSelector, { onSuccess, onError, buttonEl, busyText, idleHtml }) {
+    const form = document.querySelector(formSelector);
+    if (!form) return;
+
+    if (buttonEl) { buttonEl.disabled = true; buttonEl.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> ${busyText || 'Saving...'}`; }
+
+    fetch(form.action || form.dataset.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(data => onSuccess(data))
+        .catch(err => {
+            if (buttonEl) { buttonEl.disabled = false; buttonEl.innerHTML = idleHtml || 'Save'; }
+            let msg = err.message || 'Something went wrong.';
+            if (err.errors) msg = Object.values(err.errors).flat().join(' ');
+            onError(msg);
+        });
+}
+
+// ── Quotations ──
+function openQuotationViewModal(url) {
+    document.getElementById('quotationViewModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('quotationViewModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('quotationViewModalBody').innerHTML = html; });
+}
+function openQuotationFormModal(url) {
+    document.getElementById('quotationFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('quotationFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('quotationFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('quotationFormModalBody').innerHTML = html; });
+}
+function submitQuotationFormModal() {
+    const btn = document.getElementById('quotationFormModalSaveBtn');
+    genericSubmitForm('#quotationFormModalBody #quotationForm', {
+        buttonEl: btn, busyText: 'Creating...', idleHtml: '<i class="bi bi-check2 me-1"></i> Create',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('quotationFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+function updateQuotationStatus(id, status) {
+    fetch(`/quotations/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: JSON.stringify({ status }),
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to update status.'));
+}
+
+// ── Bookings ──
+function openBookingViewModal(url) {
+    document.getElementById('bookingViewModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('bookingViewModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('bookingViewModalBody').innerHTML = html; });
+}
+function openBookingFormModal(url) {
+    document.getElementById('bookingFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('bookingFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('bookingFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('bookingFormModalBody').innerHTML = html; });
+}
+function submitBookingFormModal() {
+    const btn = document.getElementById('bookingFormModalSaveBtn');
+    genericSubmitForm('#bookingFormModalBody #bookingForm', {
+        buttonEl: btn, busyText: 'Creating...', idleHtml: '<i class="bi bi-check2 me-1"></i> Create Booking',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('bookingFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+
+// ── Invoices ──
+function openInvoiceViewModal(url) {
+    document.getElementById('invoiceViewModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('invoiceViewModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('invoiceViewModalBody').innerHTML = html; });
+}
+function openInvoiceFormModal(url) {
+    document.getElementById('invoiceFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('invoiceFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('invoiceFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById('invoiceFormModalBody').innerHTML = html;
+            window.initInvoiceForm(document.getElementById('invoiceFormModalBody'));
+        });
+}
+function submitInvoiceFormModal() {
+    const btn = document.getElementById('invoiceFormModalSaveBtn');
+    genericSubmitForm('#invoiceFormModalBody #invoiceForm', {
+        buttonEl: btn,
+        busyText: 'Creating...',
+        idleHtml: '<i class="bi bi-check2 me-1"></i> Create Invoice',
+        onSuccess: () => {
+            window.location.reload();
+        },
+        onError: msg => {
+            const box = document.getElementById('invoiceFormModalError');
+            box.textContent = msg;
+            box.classList.remove('d-none');
+        },
+    });
+}
+function submitInvoicePayment(invoiceId) {
+    genericSubmitForm('#invoicePaymentForm', {
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('invoicePaymentError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+
+// ── Trade-Ins ──
+function openTradeInViewModal(url) {
+    document.getElementById('tradeInViewModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('tradeInViewModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('tradeInViewModalBody').innerHTML = html; });
+}
+function openTradeInFormModal(url) {
+    document.getElementById('tradeInFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('tradeInFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('tradeInFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('tradeInFormModalBody').innerHTML = html; });
+}
+function submitTradeInFormModal() {
+    const btn = document.getElementById('tradeInFormModalSaveBtn');
+    genericSubmitForm('#tradeInFormModalBody #tradeInForm', {
+        buttonEl: btn, busyText: 'Submitting...', idleHtml: '<i class="bi bi-check2 me-1"></i> Submit',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('tradeInFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+function submitTradeInApproval(id) {
+    const value = document.getElementById('tradeInApprovedValue' + id).value;
+    fetch(`/trade-ins/${id}/approve`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: JSON.stringify({ approved_value: value }),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => {
+            const box = document.getElementById('tradeInApproveError');
+            if (box) { box.textContent = err.message || 'Failed to approve.'; box.classList.remove('d-none'); }
+        });
+}
+// ── Documents ──
+function openDocumentViewModal(url) {
+    document.getElementById('documentViewFrame').src = url;
+    new bootstrap.Modal(document.getElementById('documentViewModal')).show();
+}
+// ══════════════ Vehicle Images ══════════════
+function submitVehicleImageUpload() {
+    const form = document.getElementById('vehicleImageUploadForm');
+    const input = document.getElementById('vehicleImageInput');
+    if (!input.files.length) return;
+
+    fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => {
+            let msg = err.message || 'Upload failed.';
+            if (err.errors) msg = Object.values(err.errors).flat().join(' ');
+            alert(msg);
+        });
+}
+
+function setFeaturedVehicleImage(vehicleId, mediaId) {
+    fetch(`/vehicles/${vehicleId}/images/${mediaId}/feature`, {
+        method: 'PATCH',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to set featured image.'));
+}
+
+
+
+// ══════════════ Vehicle Detail Tabs (Details/Costs/File/QR/Transfers/History) ══════════════
+window.initVehicleDetailTabs = function (scope) {
+    scope = scope || document;
+
+    // Auto-open tab from URL hash (only relevant on the standalone full page)
+    if (scope === document) {
+        const hash = window.location.hash;
+        if (hash) {
+            const tabEl = scope.querySelector(`[href="${hash}"]`);
+            if (tabEl) new bootstrap.Tab(tabEl).show();
+        }
+    }
+};
+// ══════════════ Vehicle Documents (multi-row batch upload) ══════════════
+
+
+function addDocumentRow(vehicleId, buttonEl) {
+    const docTypes = JSON.parse(buttonEl.dataset.docTypes || '{}');
+    const expirableTypes = JSON.parse(buttonEl.dataset.expirableTypes || '[]');
+    const rowId = 'docrow-' + (++documentRowCounter);
+
+    let typeOptions = '<option value="">Document Type</option>';
+    for (const [key, label] of Object.entries(docTypes)) {
+        typeOptions += `<option value="${key}">${label}</option>`;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'row g-2 align-items-start mb-2 pb-2 border-bottom';
+    row.id = rowId;
+    row.innerHTML = `
+        <div class="col-md-3">
+            <select class="form-select form-select-sm doc-type-select" required>${typeOptions}</select>
+        </div>
+        <div class="col-md-2 doc-label-field" style="display:none;">
+            <input type="text" class="form-control form-control-sm doc-label-input" placeholder="Document label">
+        </div>
+        <div class="col-md-2 doc-expiry-field" style="display:none;">
+            <input type="date" class="form-control form-control-sm doc-expiry-input">
+        </div>
+        <div class="col-md-3">
+            <input type="file" class="form-control form-control-sm doc-file-input" accept=".pdf,.jpg,.jpeg,.png,.webp" required>
+        </div>
+        <div class="col-md-1">
+            <div class="form-check mt-1">
+                <input class="form-check-input doc-original-input" type="checkbox">
+                <label class="form-check-label small">Original</label>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-light btn-sm text-danger" onclick="removeDocumentRow('${rowId}', '${vehicleId}')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    `;
+
+    document.getElementById(`documentRows-${vehicleId}`).appendChild(row);
+
+    const typeSelect = row.querySelector('.doc-type-select');
+    typeSelect.addEventListener('change', function () {
+        row.querySelector('.doc-label-field').style.display = this.value === 'other' ? '' : 'none';
+        row.querySelector('.doc-expiry-field').style.display = expirableTypes.includes(this.value) ? '' : 'none';
+    });
+
+    document.getElementById(`documentRowsEmpty-${vehicleId}`)?.classList.add('d-none');
+    document.getElementById(`documentUploadAllWrap-${vehicleId}`)?.classList.remove('d-none');
+}
+
+function removeDocumentRow(rowId, vehicleId) {
+    document.getElementById(rowId)?.remove();
+
+    const rowsContainer = document.getElementById(`documentRows-${vehicleId}`);
+    if (rowsContainer && rowsContainer.children.length === 0) {
+        document.getElementById(`documentUploadAllWrap-${vehicleId}`)?.classList.add('d-none');
+        document.getElementById(`documentRowsEmpty-${vehicleId}`)?.classList.remove('d-none');
+    }
+}
+
+function submitAllDocuments(vehicleId) {
+    const form = document.getElementById(`documentBatchForm-${vehicleId}`);
+    const rowsContainer = document.getElementById(`documentRows-${vehicleId}`);
+    const errorBox = document.getElementById(`documentBatchError-${vehicleId}`);
+    errorBox.classList.add('d-none');
+
+    const rows = Array.from(rowsContainer.children);
+    if (rows.length === 0) return;
+
+    const fd = new FormData();
+    fd.append(
+    '_token',
+    document.querySelector('meta[name="csrf-token"]')?.content || ''
+);
+
+    let valid = true;
+    rows.forEach((row, i) => {
+        const type = row.querySelector('.doc-type-select').value;
+        const file = row.querySelector('.doc-file-input').files[0];
+        const label = row.querySelector('.doc-label-input')?.value || '';
+        const expiry = row.querySelector('.doc-expiry-input')?.value || '';
+        const original = row.querySelector('.doc-original-input').checked;
+
+        if (!type || !file) { valid = false; return; }
+
+        fd.append(`documents[${i}][document_type]`, type);
+        fd.append(`documents[${i}][file]`, file);
+        if (label) fd.append(`documents[${i}][document_label]`, label);
+        if (expiry) fd.append(`documents[${i}][expiry_date]`, expiry);
+        fd.append(`documents[${i}][is_original]`, original ? '1' : '0');
+    });
+
+    if (!valid) {
+        errorBox.textContent = 'Please select a document type and choose a file for every row.';
+        errorBox.classList.remove('d-none');
+        return;
+    }
+
+    fetch(form.dataset.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd,
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => { window.location.reload(); })
+        .catch(err => {
+            let msg = err.message || 'Upload failed.';
+            if (err.errors) msg = Object.values(err.errors).flat().join(' ');
+            errorBox.textContent = msg;
+            errorBox.classList.remove('d-none');
+        });
+}
+// ══════════════ Vehicle Status Change ══════════════
+function submitVehicleStatusChange(event, vehicleId) {
+    event.preventDefault();
+    const form = document.getElementById(`statusForm-${vehicleId}`);
+    const errorBox = document.getElementById(`statusFormError-${vehicleId}`);
+    errorBox.classList.add('d-none');
+
+    // PHP does not parse multipart/form-data bodies for PATCH/PUT/DELETE
+    // requests (only POST) — so we must send this as URL-encoded data,
+    // not as a raw FormData object, for the fields to actually arrive.
+    const params = new URLSearchParams();
+    new FormData(form).forEach((value, key) => params.append(key, value));
+
+    fetch(form.dataset.url, {
+        method: 'PATCH',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRF-TOKEN': ajaxCsrfToken(),
+        },
+        body: params.toString(),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => {
+            errorBox.textContent = err.message || 'Failed to update status.';
+            errorBox.classList.remove('d-none');
+        });
+
+    return false;
+}
+
+// ══════════════ Vehicle Documents (verify/delete) ══════════════
+function verifyVehicleDocument(vehicleId, documentId) {
+    fetch(`/vehicles/${vehicleId}/documents/${documentId}/verify`, {
+        method: 'PATCH',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to verify document.'));
+}
+
+function deleteVehicleDocument(vehicleId, documentId) {
+    if (!confirm('Remove this document?')) return;
+
+    fetch(`/vehicles/${vehicleId}/documents/${documentId}`, {
+        method: 'DELETE',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to remove document.'));
+}
+
+// ══════════════ QR Regenerate ══════════════
+function regenerateVehicleQr(vehicleId) {
+    if (!confirm('Regenerate QR code? The old QR code will stop working.')) return;
+
+    fetch(`/vehicles/${vehicleId}/qr/regenerate`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+    })
+        .then(r => r.json())
+        .then(() => window.location.reload())
+        .catch(() => alert('Failed to regenerate QR code.'));
+}
+
+// ══════════════ Vehicle Transfers ══════════════
+function submitVehicleTransferInitiate(event, vehicleId) {
+    event.preventDefault();
+    const form = document.getElementById(`transferInitiateForm-${vehicleId}`);
+    const errorBox = document.getElementById(`transferInitiateError-${vehicleId}`);
+    errorBox.classList.add('d-none');
+
+    fetch(form.dataset.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => {
+            errorBox.textContent = err.message || 'Failed to request transfer.';
+            errorBox.classList.remove('d-none');
+        });
+
+    return false;
+}
+
+function respondToVehicleTransfer(transferId, action) {
+    let body = null;
+
+    if (action === 'reject') {
+        const reason = prompt('Reason for rejecting this transfer:', 'Rejected');
+        if (reason === null) return;
+        body = new URLSearchParams({ reason }).toString();
+    }
+
+    fetch(`/vehicles/transfers/${transferId}/${action}`, {
+        method: 'PATCH',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': ajaxCsrfToken(),
+            ...(body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
+        },
+        body,
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => alert(err.message || 'Failed to update transfer.'));
+}
+window.initPaymentForm = function (scope) {
+    scope = scope || document;
+    const form = scope.querySelector('#paymentForm');
+    if (!form || form.dataset.initialized) return;
+    form.dataset.initialized = '1';
+
+    const partyType = form.querySelector('.vf-pay-party-type');
+    const custSel = form.querySelector('.vf-pay-party-customer');
+    const vendSel = form.querySelector('.vf-pay-party-vendor');
+    const empSel  = form.querySelector('.vf-pay-party-employee');
+    const otherIn = form.querySelector('.vf-pay-party-other');
+
+    function togglePartySelectors() {
+        const val = partyType.value;
+        [custSel, vendSel, empSel, otherIn].forEach(el => { el.style.display = 'none'; el.disabled = true; });
+        const map = { customer: custSel, vendor: vendSel, employee: empSel, other: otherIn };
+        const active = map[val];
+        if (active) { active.style.display = ''; active.disabled = false; }
+    }
+
+    partyType?.addEventListener('change', togglePartySelectors);
+    togglePartySelectors();
+};
+
+// ══════════════ Payments ══════════════
+function openPaymentFormModal(url, label) {
+    document.getElementById('paymentFormModalTitle').textContent = label ? 'Edit Payment' : 'Record Payment';
+    document.getElementById('paymentFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('paymentFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('paymentFormModal')).show();
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById('paymentFormModalBody').innerHTML = html;
+            window.initPaymentForm(document.getElementById('paymentFormModalBody'));
+        });
+}
+function submitPaymentFormModal() {
+    const btn = document.getElementById('paymentFormModalSaveBtn');
+    genericSubmitForm('#paymentFormModalBody #paymentForm', {
+        buttonEl: btn, busyText: 'Saving...', idleHtml: '<i class="bi bi-check2 me-1"></i> Save',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('paymentFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+let paymentDeleteContext = null;
+function openPaymentDeleteModal(url, label, triggerEl) {
+    paymentDeleteContext = { url, row: triggerEl.closest('tr') };
+    document.getElementById('paymentDeleteModalName').textContent = label;
+    document.getElementById('paymentDeleteModalError').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('paymentDeleteModal')).show();
+}
+function submitPaymentDeleteModal() {
+    if (!paymentDeleteContext) return;
+    const errorBox = document.getElementById('paymentDeleteModalError');
+    const btn = document.getElementById('paymentDeleteModalConfirmBtn');
+    errorBox.classList.add('d-none');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting...';
+    const fd = new FormData(); fd.append('_method', 'DELETE');
+    fetch(paymentDeleteContext.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: fd,
+    })
+        .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+        .then(() => {
+            bootstrap.Modal.getInstance(document.getElementById('paymentDeleteModal')).hide();
+            paymentDeleteContext.row?.remove();
+            paymentDeleteContext = null;
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-trash me-1"></i> Delete';
+            errorBox.textContent = err.message || 'Failed to delete payment.';
+            errorBox.classList.remove('d-none');
+        });
+}
+
+// ══════════════ Vendors ══════════════
+function openVendorFormModal(url, label) {
+    document.getElementById('vendorFormModalTitle').textContent = label ? 'Edit Vendor' : 'Add Vendor';
+    document.getElementById('vendorFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('vendorFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('vendorFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('vendorFormModalBody').innerHTML = html; });
+}
+function submitVendorFormModal() {
+    const btn = document.getElementById('vendorFormModalSaveBtn');
+    genericSubmitForm('#vendorFormModalBody #vendorForm', {
+        buttonEl: btn, busyText: 'Saving...', idleHtml: '<i class="bi bi-check2 me-1"></i> Save',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('vendorFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+let vendorDeleteContext = null;
+function openVendorDeleteModal(url, label, triggerEl) {
+    vendorDeleteContext = { url, row: triggerEl.closest('tr') };
+    document.getElementById('vendorDeleteModalName').textContent = label;
+    document.getElementById('vendorDeleteModalError').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('vendorDeleteModal')).show();
+}
+function submitVendorDeleteModal() {
+    if (!vendorDeleteContext) return;
+    const errorBox = document.getElementById('vendorDeleteModalError');
+    const btn = document.getElementById('vendorDeleteModalConfirmBtn');
+    errorBox.classList.add('d-none');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting...';
+    const fd = new FormData(); fd.append('_method', 'DELETE');
+    fetch(vendorDeleteContext.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: fd,
+    })
+        .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+        .then(() => {
+            bootstrap.Modal.getInstance(document.getElementById('vendorDeleteModal')).hide();
+            vendorDeleteContext.row?.remove();
+            vendorDeleteContext = null;
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-trash me-1"></i> Delete';
+            errorBox.textContent = err.message || 'Failed to delete vendor.';
+            errorBox.classList.remove('d-none');
+        });
+}
+
+// ══════════════ Expenses ══════════════
+function openExpenseFormModal(url, label) {
+    document.getElementById('expenseFormModalTitle').textContent = label ? 'Edit Expense' : 'Add Expense';
+    document.getElementById('expenseFormModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    document.getElementById('expenseFormModalError')?.classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('expenseFormModal')).show();
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => { document.getElementById('expenseFormModalBody').innerHTML = html; });
+}
+function submitExpenseFormModal() {
+    const btn = document.getElementById('expenseFormModalSaveBtn');
+    genericSubmitForm('#expenseFormModalBody #expenseForm', {
+        buttonEl: btn, busyText: 'Saving...', idleHtml: '<i class="bi bi-check2 me-1"></i> Save',
+        onSuccess: () => window.location.reload(),
+        onError: msg => {
+            const box = document.getElementById('expenseFormModalError');
+            box.textContent = msg; box.classList.remove('d-none');
+        },
+    });
+}
+let expenseDeleteContext = null;
+function openExpenseDeleteModal(url, label, triggerEl) {
+    expenseDeleteContext = { url, row: triggerEl.closest('tr') };
+    document.getElementById('expenseDeleteModalName').textContent = label;
+    document.getElementById('expenseDeleteModalError').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('expenseDeleteModal')).show();
+}
+function submitExpenseDeleteModal() {
+    if (!expenseDeleteContext) return;
+    const errorBox = document.getElementById('expenseDeleteModalError');
+    const btn = document.getElementById('expenseDeleteModalConfirmBtn');
+    errorBox.classList.add('d-none');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting...';
+    const fd = new FormData(); fd.append('_method', 'DELETE');
+    fetch(expenseDeleteContext.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ajaxCsrfToken() },
+        body: fd,
+    })
+        .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw data; return data; })
+        .then(() => {
+            bootstrap.Modal.getInstance(document.getElementById('expenseDeleteModal')).hide();
+            expenseDeleteContext.row?.remove();
+            expenseDeleteContext = null;
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-trash me-1"></i> Delete';
+            errorBox.textContent = err.message || 'Failed to delete expense.';
+            errorBox.classList.remove('d-none');
+        });
+}
+
+
+function submitLeadStatusChange(event, leadId) {
+    event.preventDefault();
+    const form = document.getElementById(`leadStatusForm-${leadId}`);
+    const errorBox = document.getElementById(`leadStatusError-${leadId}`);
+    errorBox.classList.add('d-none');
+
+    const params = new URLSearchParams();
+    new FormData(form).forEach((value, key) => params.append(key, value));
+
+    fetch(form.dataset.url, {
+        method: 'PATCH',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRF-TOKEN': ajaxCsrfToken(),
+        },
+        body: params.toString(),
+    })
+        .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw data;
+            return data;
+        })
+        .then(() => window.location.reload())
+        .catch(err => {
+            let msg = err.message || 'Failed to update status.';
+            if (err.errors) msg = Object.values(err.errors).flat().join(' ');
+            errorBox.textContent = msg;
+            errorBox.classList.remove('d-none');
+        });
+
+    return false;
+}
+
+document.addEventListener('change', function (e) {
+    if (e.target.classList.contains('vf-lead-status')) {
+        const form = e.target.closest('form');
+        const lostField = form.querySelector('.vf-lead-lost-reason');
+        if (lostField) lostField.style.display = e.target.value === 'lost' ? '' : 'none';
+    }
+});
+
+
+</script>
+<script>
+    // ══════════════════════════════════════════════════════════════
+// TOPBAR DROPDOWNS
+// ══════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', function () {
+    const dropdowns = [
+        {
+            button: document.getElementById('notificationsBtn'),
+            panel: document.getElementById('notificationsPanel')
+        },
+        {
+            button: document.getElementById('messagesBtn'),
+            panel: document.getElementById('messagesPanel')
+        },
+        {
+            button: document.getElementById('modulesBtn'),
+            panel: document.getElementById('modulesPanel')
+        }
+    ];
+
+    function closeAllTopbarPanels(exceptPanel = null) {
+        dropdowns.forEach(function (item) {
+            if (!item.button || !item.panel) {
+                return;
+            }
+
+            if (item.panel !== exceptPanel) {
+                item.panel.classList.remove('open');
+                item.button.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
+            }
+        });
+    }
+
+
+    dropdowns.forEach(function (item) {
+        if (!item.button || !item.panel) {
+            return;
+        }
+
+        item.button.addEventListener('click', function (event) {
+            event.stopPropagation();
+            const isOpen = item.panel.classList.contains('open');
+            closeAllTopbarPanels(
+                isOpen ? null : item.panel
+            );
+
+            if (!isOpen) {
+
+                item.panel.classList.add('open');
+                item.button.setAttribute(
+                    'aria-expanded',
+                    'true'
+                );
+
+            } else {
+
+                item.panel.classList.remove('open');
+                item.button.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
+            }
+        });
+
+
+        item.panel.addEventListener('click', function (event) {
+            event.stopPropagation();
+        });
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', function () {
+        closeAllTopbarPanels();
+    });
+
+
+    // Close with Escape
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeAllTopbarPanels();
+        }
+    });
+
+
+    // Mark notifications as read
+    const markReadBtn =
+        document.getElementById('markNotificationsRead');
+    if (markReadBtn) {
+        markReadBtn.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document
+                .querySelectorAll('.notification-unread')
+                .forEach(function (dot) {
+                    dot.style.display = 'none';
+                });
+            const badge =
+                document.querySelector(
+                    '#notificationsBtn .topbar-badge'
+                );
+
+            if (badge) {
+                badge.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+@stack('scripts')
+</body>
+</html>

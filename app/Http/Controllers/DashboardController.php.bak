@@ -1,0 +1,102 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Booking;
+use App\Models\Customer;
+use App\Models\Expense;
+use App\Models\Lead;
+use App\Models\Payment;
+use App\Models\Quotation;
+use App\Models\SaleInvoice;
+use App\Models\Vehicle;
+use Illuminate\View\View;
+
+class DashboardController extends Controller
+{
+    public function index(): View
+    {
+        $tenant = app('tenant');
+
+        // ── Inventory ────────────────────────────────────────────
+        $statusCounts = Vehicle::selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
+        $kpis = [
+            'total_vehicles'    => $statusCounts->sum(),
+            'available'         => $statusCounts->get('available', 0),
+            'reserved'          => $statusCounts->get('reserved', 0),
+            'sold_this_month'   => Vehicle::whereMonth('sold_at', now()->month)
+                                          ->whereYear('sold_at', now()->year)
+                                          ->whereIn('status', ['sold','delivered'])
+                                          ->count(),
+            'inventory_value'   => (float) Vehicle::whereIn('status', ['available','reserved','pending_inspection'])
+                                                   ->sum('total_cost'),
+            'pending_inspection'=> $statusCounts->get('pending_inspection', 0),
+        ];
+
+        $recentVehicles = Vehicle::with(['make','vehicleModel','branch'])
+            ->latest()
+            ->limit(8)
+            ->get();
+
+        // ── CRM ──────────────────────────────────────────────────
+        $leadStatusCounts = Lead::selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
+        $crm = [
+            'total_customers'   => Customer::count(),
+            'new_customers'     => Customer::whereMonth('created_at', now()->month)
+                                            ->whereYear('created_at', now()->year)
+                                            ->count(),
+            'total_leads'       => $leadStatusCounts->sum(),
+            'new_leads'         => $leadStatusCounts->get('new', 0),
+            'qualified_leads'   => $leadStatusCounts->get('qualified', 0),
+            'won_leads'         => $leadStatusCounts->get('won', 0),
+        ];
+
+        $recentLeads = Lead::with('assignedTo')
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        // ── Sales ────────────────────────────────────────────────
+        $sales = [
+            'quotations_pending'=> Quotation::where('status', 'sent')->count(),
+            'active_bookings'   => Booking::where('status', 'active')->count(),
+            'invoices_this_month'=> SaleInvoice::whereMonth('invoice_date', now()->month)
+                                                ->whereYear('invoice_date', now()->year)
+                                                ->count(),
+            'revenue_this_month'=> (float) SaleInvoice::whereMonth('invoice_date', now()->month)
+                                                       ->whereYear('invoice_date', now()->year)
+                                                       ->whereIn('status', ['issued','paid','partial'])
+                                                       ->sum('net_amount'),
+            'outstanding_balance'=> (float) SaleInvoice::whereIn('status', ['issued','partial'])
+                                                        ->sum('balance_due'),
+        ];
+
+        // ── Accounting ───────────────────────────────────────────
+        $accounting = [
+            'expenses_this_month'=> (float) Expense::whereMonth('expense_date', now()->month)
+                                                    ->whereYear('expense_date', now()->year)
+                                                    ->where('status', 'approved')
+                                                    ->sum('amount'),
+            'payments_received_this_month'=> (float) Payment::where('type', 'received')
+                                                    ->whereMonth('payment_date', now()->month)
+                                                    ->whereYear('payment_date', now()->year)
+                                                    ->sum('amount'),
+            'payments_paid_this_month'=> (float) Payment::where('type', 'paid')
+                                                    ->whereMonth('payment_date', now()->month)
+                                                    ->whereYear('payment_date', now()->year)
+                                                    ->sum('amount'),
+        ];
+        $accounting['net_this_month'] = $sales['revenue_this_month'] - $accounting['expenses_this_month'];
+
+        return view('dashboard.index', compact(
+            'kpis', 'recentVehicles', 'tenant',
+            'crm', 'recentLeads', 'sales', 'accounting'
+        ));
+    }
+}

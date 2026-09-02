@@ -1,0 +1,3367 @@
+:root {
+    --showroom-bg: #f4f3ef;
+    --showroom-surface: #ffffff;
+    --showroom-ink: #111111;
+    --showroom-muted: #6f6f6a;
+    --showroom-line: #deddd7;
+    --showroom-dark: #151515;
+    --showroom-radius: 18px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: var(--showroom-bg);
+    color: var(--showroom-ink);
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+.container {
+    width: min(1400px, calc(100% - 64px));
+    margin-inline: auto;
+}
+
+/* ---------------------------------------------------------
+   HEADER
+--------------------------------------------------------- */
+
+.showroom-header {
+    position: relative;
+    z-index: 50;
+
+    background: rgba(244, 243, 239, 0.96);
+
+    border-bottom: 1px solid var(--showroom-line);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.showroom-header__inner {
+    min-height: 88px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 40px;
+}
+
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+.showroom-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+
+    flex-shrink: 0;
+
+    color: var(--showroom-ink);
+}
+
+.showroom-logo__mark {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: var(--showroom-dark);
+    color: #fff;
+
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+}
+
+.showroom-logo__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.showroom-logo__text strong {
+    font-size: 16px;
+    font-weight: 750;
+    line-height: 1;
+
+    letter-spacing: -0.035em;
+}
+
+.showroom-logo__text small {
+    color: var(--showroom-muted);
+
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1;
+
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.showroom-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 34px;
+
+    margin-left: auto;
+}
+
+.showroom-nav a {
+    position: relative;
+
+    padding: 8px 0;
+
+    color: #555;
+
+    font-size: 13px;
+    font-weight: 650;
+
+    transition:
+        color 180ms ease;
+}
+
+.showroom-nav a::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 1px;
+
+    background: var(--showroom-dark);
+
+    transform: scaleX(0);
+    transform-origin: center;
+
+    transition:
+        transform 180ms ease;
+}
+
+.showroom-nav a:hover {
+    color: var(--showroom-dark);
+}
+
+.showroom-nav a:hover::after,
+.showroom-nav a.is-active::after {
+    transform: scaleX(1);
+}
+
+.showroom-nav a.is-active {
+    color: var(--showroom-dark);
+}
+
+
+/* =========================================================
+   HEADER CTA
+   ========================================================= */
+
+.showroom-header__action {
+    display: flex;
+    align-items: center;
+
+    flex-shrink: 0;
+}
+
+.showroom-header__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    min-height: 42px;
+
+    padding: 0 18px;
+
+    border-radius: 999px;
+
+    background: var(--showroom-dark);
+    color: #fff;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    transition:
+        transform 180ms ease,
+        background 180ms ease;
+}
+
+.showroom-header__button span {
+    font-size: 15px;
+    line-height: 1;
+
+    transition:
+        transform 180ms ease;
+}
+
+.showroom-header__button:hover {
+    transform: translateY(-2px);
+}
+
+.showroom-header__button:hover span {
+    transform: translateX(3px);
+}
+
+/* ---------------------------------------------------------
+   HERO
+--------------------------------------------------------- */
+
+.showroom-hero {position: relative;padding: 72px 0 86px;overflow: hidden;
+    background:linear-gradient(to right,rgba(20, 30, 45, 0.85) 0%,rgba(20, 30, 45, 0.55) 50%,rgba(20, 30, 45, 0.15) 100%),
+    url("../images/hero-showroom.jpg") center / cover no-repeat;}
+.showroom-hero__grid {display: grid;grid-template-columns:minmax(0, 0.9fr)minmax(0, 1.1fr);align-items: center;gap: 70px;}
+
+
+/* =========================================================
+   HERO CONTENT
+   ========================================================= */
+
+.showroom-hero__content {max-width: 680px;}
+.showroom-hero__eyebrow {display: inline-flex;align-items: center;gap: 10px;margin-bottom: 24px;color:#bb9f6f;font-size: 10px;font-weight: 800;letter-spacing: 0.18em;}
+.showroom-hero__eyebrow::before {content: "";width: 28px;height: 1px;background:#bb9f6f;}
+.showroom-hero h1 {max-width: 720px;margin: 0;font-size: clamp(52px, 6vw, 92px);line-height: 0.92;letter-spacing: -0.065em;font-weight: 750;color: #fff;}
+.showroom-hero h1 span {display: block;color:#bb9f6f;}
+.showroom-hero p {max-width: 560px;margin: 30px 0 0;color: var(--showroom-muted);font-size: 18px;line-height: 1.65;}
+.showroom-hero__actions {display: flex;align-items: center;gap: 12px;margin-top: 34px;color:#bb9f6f}
+.showroom-hero__actions .btn span {margin-left: 8px;transition:transform 180ms ease;color:#bb9f6f}
+.showroom-hero__actions .btn:hover span {transform: translateX(3px);}
+.hero_contact_btn {color: #fff!important}
+
+
+/* =========================================================
+   HERO TRUST
+   ========================================================= */
+
+.showroom-hero__trust {display: flex;flex-wrap: wrap;gap: 28px;margin-top: 46px;padding-top: 24px;border-top: 1px solid #bb9f6f;}
+.showroom-hero__trust div {display: flex;flex-direction: column;gap: 5px;}
+.showroom-hero__trust strong {color:#bb9f6f;font-size: 10px;font-weight: 800;letter-spacing: 0.12em;}
+.showroom-hero__trust span {font-size: 12px;font-weight: 650;color: #fff}
+
+
+/* =========================================================
+   HERO VISUAL
+   ========================================================= */
+
+.showroom-hero__visual {position: relative;min-width: 0;display: none;}
+.showroom-hero__image {position: relative;width: 100%;aspect-ratio: 4 / 3;overflow: hidden;border-radius: 24px;background: #deddd7;}
+.showroom-hero__image::after {content: "";position: absolute;inset: 0;background:linear-gradient(180deg,rgba(0, 0, 0, 0) 55%,rgba(0, 0, 0, 0.16));
+    pointer-events: none;}
+.showroom-hero__image img {width: 100%;height: 100%;object-fit: cover;object-position: center;transition:transform 700ms ease;}
+.showroom-hero__visual:hover .showroom-hero__image img {transform: scale(1.015);}
+
+
+/* =========================================================
+   HERO BADGE
+   ========================================================= */
+
+.showroom-hero__badge {position: absolute;right: 22px;bottom: 22px;display: flex;flex-direction: column;gap: 4px;padding: 15px 18px;border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 12px;background: rgba(17, 17, 17, 0.82);color: #fff;backdrop-filter: blur(10px);}
+.showroom-hero__badge strong {font-size: 12px;font-weight: 750;}
+.showroom-hero__badge span {color: rgba(255, 255, 255, 0.62);font-size: 9px;font-weight: 700;letter-spacing: 0.1em;text-transform: uppercase;}
+
+/* =========================================================
+   HERO — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .showroom-hero {padding: 60px 0 70px;}
+    .showroom-hero__grid {grid-template-columns: 1fr;gap: 45px;}
+    .showroom-hero__content {max-width: 760px;}
+    .showroom-hero__visual {max-width: 760px;}
+
+}
+
+
+/* =========================================================
+   HERO — MOBILE
+   ========================================================= */
+
+@media (max-width: 620px) {
+
+    .showroom-hero {
+        padding: 45px 0 55px;
+    }
+
+    .showroom-hero h1 {
+        font-size: clamp(46px, 14vw, 68px);
+    }
+
+    .showroom-hero p {
+        margin-top: 24px;
+
+        font-size: 16px;
+    }
+
+    .showroom-hero__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .showroom-hero__actions .btn {
+        width: 100%;
+    }
+
+    .showroom-hero__trust {
+        gap: 18px 24px;
+        margin-top: 35px;
+    }
+
+    .showroom-hero__image {
+        aspect-ratio: 4 / 3;
+
+        border-radius: 18px;
+    }
+
+    .showroom-hero__badge {
+        right: 12px;
+        bottom: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   VEHICLE SEARCH
+   ========================================================= */
+
+.showroom-search {
+    position: relative;
+
+    margin-top: -20px;
+
+    padding-bottom: 30px;
+
+    z-index: 5;
+}
+
+.showroom-search__box {
+    padding: 28px 30px 22px;
+
+    border: 1px solid var(--showroom-line);
+    border-radius: 18px;
+
+    background: #fff;
+
+    box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =========================================================
+   SEARCH INTRO
+   ========================================================= */
+
+.showroom-search__intro {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 22px;
+}
+
+.showroom-search__intro span {
+    color: var(--showroom-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 0.16em;
+}
+
+.showroom-search__intro h2 {
+    margin: 0;
+
+    font-size: 24px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    letter-spacing: -0.04em;
+}
+
+
+/* =========================================================
+   SEARCH FORM
+   ========================================================= */
+
+.showroom-search__form {
+    display: grid;
+
+    grid-template-columns:
+        minmax(240px, 1.5fr)
+        minmax(150px, 0.8fr)
+        minmax(170px, 0.9fr)
+        auto;
+
+    gap: 10px;
+
+    align-items: end;
+}
+
+
+/* =========================================================
+   SEARCH FIELD
+   ========================================================= */
+
+.showroom-search__field {
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+.showroom-search__field label {
+    color: #777;
+
+    font-size: 9px;
+    font-weight: 750;
+
+    letter-spacing: 0.1em;
+
+    text-transform: uppercase;
+}
+
+.showroom-search__field input,
+.showroom-search__field select {
+    width: 100%;
+    height: 48px;
+
+    padding: 0 14px;
+
+    border: 1px solid #d8d7d1;
+    border-radius: 9px;
+
+    outline: none;
+
+    background: #fafaf8;
+    color: var(--showroom-ink);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    transition:
+        border-color 180ms ease,
+        background 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.showroom-search__field input::placeholder {
+    color: #999;
+}
+
+.showroom-search__field input:focus,
+.showroom-search__field select:focus {
+    border-color: #999;
+
+    background: #fff;
+
+    box-shadow:
+        0 0 0 3px rgba(17, 17, 17, 0.05);
+}
+
+
+/* =========================================================
+   SEARCH BUTTON
+   ========================================================= */
+
+.showroom-search__button {height: 48px;display: inline-flex;align-items: center;justify-content: center;gap: 12px;padding: 0 20px;
+    border: 0;border-radius: 9px;background: var(--showroom-dark);color: #fff;cursor: pointer;font-family: inherit;font-size: 12px;font-weight: 700;
+    white-space: nowrap;transition:transform 180ms ease,background 180ms ease;}
+.showroom-search__button span {font-size: 15px;transition:transform 180ms ease;}
+.showroom-search__button:hover {transform: translateY(-2px);}
+.showroom-search__button:hover span {transform: translateX(3px);}
+
+
+/* =========================================================
+   SEARCH BOTTOM
+   ========================================================= */
+
+.showroom-search__bottom {display: flex;align-items: center;justify-content: space-between;gap: 20px;margin-top: 18px;}
+.showroom-search__bottom span { color: #999;font-size: 11px;}
+.showroom-search__bottom a {color: #333;font-size: 11px;font-weight: 700;}
+.showroom-search__bottom a:hover {text-decoration: underline;}
+
+/* =========================================================
+   VEHICLE SEARCH — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .showroom-search__form {grid-template-columns: 1fr 1fr;}
+    .showroom-search__field--wide {grid-column: 1 / -1; }
+    .showroom-search__button { width: 100%;}
+
+}
+
+
+/* =========================================================
+   VEHICLE SEARCH — MOBILE
+   ========================================================= */
+
+@media (max-width: 620px) {
+
+    .showroom-search { margin-top: 0;padding-bottom: 10px;}
+    .showroom-search__box {padding: 22px 18px 18px;border-radius: 14px;}
+    .showroom-search__intro { display: block;margin-bottom: 18px;}
+    .showroom-search__intro h2 { margin-top: 8px; font-size: 21px; }
+    .showroom-search__form {grid-template-columns: 1fr;gap: 12px;}
+    .showroom-search__field--wide {grid-column: auto;}
+    .showroom-search__bottom {align-items: flex-start;flex-direction: column;gap: 7px;}
+
+}
+
+
+
+
+/* =========================================================
+   FEATURED VEHICLES
+   ========================================================= */
+
+.section-heading__side {display: flex;flex-direction: column;align-items: flex-end; gap: 14px;max-width: 360px;}
+.section-heading__side p {margin: 0;color: var(--showroom-muted);font-size: 14px;line-height: 1.6;text-align: right;}
+.section-heading__link {display: inline-flex;align-items: center;gap: 8px;color: var(--showroom-ink);font-size: 12px;font-weight: 750;}
+.section-heading__link span {transition:transform 180ms ease;}
+.section-heading__link:hover span {transform: translateX(4px);}
+
+
+/* =========================================================
+   VEHICLE CARD IMAGE LINK
+   ========================================================= */
+
+.vehicle-card__image-link {display: block;}
+.vehicle-card__image { position: relative;}
+
+
+/* =========================================================
+   VEHICLE STATUS
+   ========================================================= */
+
+.vehicle-card__status {
+    position: absolute;top: 14px;left: 14px;padding: 7px 10px;border: 1px solid rgba(255, 255, 255, 0.25);border-radius: 999px;
+    background: rgba(17, 17, 17, 0.78);color: #fff;font-size: 9px;font-weight: 750; 
+    letter-spacing: 0.08em;text-transform: uppercase; backdrop-filter: blur(8px);}
+
+
+/* =========================================================
+   FEATURED VEHICLES BOTTOM
+   ========================================================= */
+
+.showroom-vehicles__bottom { display: flex; justify-content: center; margin-top: 42px;}
+.showroom-vehicles__bottom .btn span { margin-left: 8px;}
+.showroom-vehicles__empty {padding: 70px 30px; border: 1px solid var(--showroom-line); border-radius: 18px; background: #fff; text-align: center;}
+.showroom-vehicles__empty h3 { margin: 0;font-size: 24px;}
+.showroom-vehicles__empty p {margin: 10px 0 24px;color: var(--showroom-muted);}
+
+
+
+/* =========================================================
+   HOMEPAGE SHOWCASE GRID
+   ========================================================= */
+
+.showcase-section {width: 100%;padding: 0;background: #111827;margin-top: 110px}
+.showcase-grid {display: grid;grid-template-columns: repeat(3, 1fr);}
+.showcase-card {position: relative;height:500px;overflow: hidden;display: block;color: #fff;text-decoration: none;}
+.showcase-card img {width: 100%;height: 100%;display: block;object-fit: cover;transition: transform .6s ease;}
+.showcase-card:hover img {transform: scale(1.06);}
+.showcase-overlay {position: absolute;inset: 0;background:linear-gradient(to top,rgba(0, 0, 0, .72) 0%,rgba(0, 0, 0, .25) 45%,rgba(0, 0, 0, .12) 100%);transition: background .3s ease;}
+.showcase-card:hover .showcase-overlay {background:linear-gradient(to top,rgba(0, 0, 0, .78) 0%,rgba(0, 0, 0, .32) 55%,rgba(0, 0, 0, .18) 100%);}
+.showcase-content {position: absolute;left: 32px;right: 32px;bottom: 32px;z-index: 2;}
+.showcase-content > span:first-child {display: block;margin-bottom: 14px;font-size: .72rem;font-weight: 600;letter-spacing: 2px;text-transform: uppercase;color: rgba(255,255,255,.82);}
+.showcase-content h2 {margin: 0 0 24px;color: #fff;font-size: 1.55rem;font-weight: 500;letter-spacing: 3px;text-transform: uppercase;}
+.showcase-btn {display: inline-block;padding: 11px 22px;background: #fff;color: #111827;font-size: .7rem;font-weight: 700;letter-spacing: 1.5px;text-transform: uppercase;transition: all .25s ease;}
+.showcase-card:hover .showcase-btn {background: var(--primary);color: #fff;}
+
+/* Tablet */
+@media (max-width: 900px) {
+    .showcase-grid {grid-template-columns: repeat(2, 1fr);}
+    .showcase-card {height: 330px;}
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .showcase-grid {grid-template-columns: 1fr;}
+    .showcase-card {height: 300px;}
+    .showcase-content {left: 22px;right: 22px;bottom: 24px;}
+    .showcase-content h2 {font-size: 1.3rem;}
+}
+
+
+/* =========================================================
+   WHY CHOOSE US
+   ========================================================= */
+
+.showroom-why {padding: 115px 0;border-top: 1px solid var(--showroom-line);border-bottom: 1px solid var(--showroom-line);background: #ebeae5;}
+.showroom-why__grid {display: grid;grid-template-columns:minmax(0, 0.85fr)minmax(0, 1.15fr);gap: 100px;align-items: start;}
+
+
+/* =========================================================
+   WHY INTRO
+   ========================================================= */
+
+.showroom-why__intro { max-width: 520px;}
+.showroom-why__intro h2 {max-width: 500px;margin: 0;font-size: clamp(42px, 5vw, 68px);line-height: 0.96;letter-spacing: -0.06em;}
+.showroom-why__intro p {max-width: 470px;margin: 26px 0 30px;color: var(--showroom-muted);font-size: 16px;line-height: 1.7;}
+.showroom-why__intro .btn span {margin-left: 8px;}
+
+
+/* =========================================================
+   WHY FEATURES
+   ========================================================= */
+
+.showroom-why__features {display: grid;grid-template-columns: 1fr 1fr;border-top: 1px solid #d3d2cc;border-left: 1px solid #d3d2cc;}
+.showroom-why__feature {display: grid;grid-template-columns: 38px minmax(0, 1fr);gap: 18px;min-height: 190px;
+    padding: 28px;border-right: 1px solid #d3d2cc;border-bottom: 1px solid #d3d2cc;}
+.showroom-why__number {color: #999;font-size: 10px;font-weight: 800;letter-spacing: 0.08em;}
+.showroom-why__feature h3 { margin: 0;font-size: 19px;font-weight: 700;line-height: 1.15;letter-spacing: -0.025em;}
+.showroom-why__feature p {margin: 12px 0 0; color: var(--showroom-muted); font-size: 13px;line-height: 1.65;}
+
+
+/* =========================================================
+   WHY — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .showroom-why {padding: 85px 0;}
+    .showroom-why__grid {grid-template-columns: 1fr; gap: 55px;}
+    .showroom-why__intro {max-width: 700px; }
+
+}
+
+
+/* =========================================================
+   WHY — MOBILE
+   ========================================================= */
+
+@media (max-width: 620px) {
+    .showroom-why {padding: 70px 0; }
+    .showroom-why__grid {gap: 40px;}
+    .showroom-why__intro h2 {font-size: 43px; }
+    .showroom-why__features {grid-template-columns: 1fr;  }
+    .showroom-why__feature {min-height: auto; padding: 24px 20px; }
+
+}
+
+
+
+/* =========================================================
+   ABOUT SHOWROOM
+   ========================================================= */
+
+.showroom-about {padding: 120px 0;}
+.showroom-about__grid {display: grid;grid-template-columns:
+        minmax(0, 1.05fr)
+        minmax(0, 0.95fr);align-items: center;gap: 90px;}
+
+
+/* =========================================================
+   ABOUT IMAGE
+   ========================================================= */
+
+.showroom-about__visual {position: relative;min-width: 0;}
+.showroom-about__image {width: 100%;aspect-ratio: 4 / 4.6;overflow: hidden;border-radius: 22px;background: #deddd7;}
+.showroom-about__image img {width: 100%;height: 100%;object-fit: cover;object-position: center;transition:transform 600ms ease;}
+.showroom-about__visual:hover .showroom-about__image img {transform: scale(1.015);}
+
+
+/* =========================================================
+   ABOUT IMAGE CAPTION
+   ========================================================= */
+
+.showroom-about__caption {position: absolute;right: 20px;bottom: 20px;display: flex;flex-direction: column;
+    gap: 5px;min-width: 170px;padding: 15px 17px;border-radius: 11px;background: rgba(17, 17, 17, 0.84);
+    color: #fff;backdrop-filter: blur(10px);}
+.showroom-about__caption span {color: rgba(255, 255, 255, 0.55);font-size: 8px;font-weight: 800;letter-spacing: 0.15em;}
+.showroom-about__caption strong {font-size: 13px;font-weight: 650;}
+
+
+/* =========================================================
+   ABOUT CONTENT
+   ========================================================= */
+
+.showroom-about__content {max-width: 560px;}
+.showroom-about__content h2 {max-width: 520px;margin: 0;font-size: clamp(44px, 5vw, 68px);line-height: 0.96;letter-spacing: -0.06em;}
+.showroom-about__lead {margin: 30px 0 0;color: var(--showroom-ink);font-size: 18px;line-height: 1.6;}
+.showroom-about__content > p:not(.showroom-about__lead) {margin: 16px 0 0;color: var(--showroom-muted);font-size: 14px;line-height: 1.7;}
+
+
+/* =========================================================
+   ABOUT FACTS
+   ========================================================= */
+
+.showroom-about__facts {display: grid;grid-template-columns: repeat(3, 1fr);margin-top: 34px;border-top: 1px solid var(--showroom-line);border-bottom: 1px solid var(--showroom-line);}
+.showroom-about__facts > div {display: flex;flex-direction: column;gap: 7px;min-width: 0;padding: 20px 18px 20px 0;}
+.showroom-about__facts > div + div {padding-left: 18px;border-left: 1px solid var(--showroom-line);}
+.showroom-about__facts strong {font-size: 13px;font-weight: 750;}
+.showroom-about__facts span {color: var(--showroom-muted);font-size: 10px;line-height: 1.5;}
+
+
+/* =========================================================
+   ABOUT ACTIONS
+   ========================================================= */
+
+.showroom-about__actions { display: flex; align-items: center;gap: 10px;margin-top: 30px;}
+.showroom-about__actions .btn span {margin-left: 8px;}
+
+
+/* =========================================================
+   ABOUT — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .showroom-about {padding: 90px 0;}
+    .showroom-about__grid { grid-template-columns: 1fr;gap: 55px;}
+    .showroom-about__visual { max-width: 720px;}
+    .showroom-about__content {max-width: 720px;}
+
+}
+
+
+/* =========================================================
+   ABOUT — MOBILE
+   ========================================================= */
+
+@media (max-width: 620px) {
+    .showroom-about {padding: 70px 0;}
+    .showroom-about__grid { gap: 40px;}
+    .showroom-about__image {aspect-ratio: 1 / 1.1; border-radius: 18px;}
+    .showroom-about__content h2 {font-size: 43px;}
+    .showroom-about__lead { font-size: 16px; }
+    .showroom-about__facts { grid-template-columns: 1fr;}
+    .showroom-about__facts > div, .showroom-about__facts > div + div {padding: 16px 0; border-left: 0; }
+    .showroom-about__facts > div + div { border-top: 1px solid var(--showroom-line); }
+    .showroom-about__actions {flex-direction: column; align-items: stretch; }
+    .showroom-about__actions .btn { width: 100%; }
+
+}
+
+
+/* =========================================================
+   SERVICES
+   ========================================================= */
+
+.showroom-services {padding: 115px 0;background: var(--showroom-dark);color: #fff;}
+
+/* =========================================================
+   SERVICES HEADER
+   ========================================================= */
+
+.showroom-services__header {display: flex;align-items: end;justify-content: space-between;gap: 60px;margin-bottom: 55px;}
+.showroom-services__header .section-heading__label {color: rgba(255, 255, 255, 0.45);}
+.showroom-services__header h2 { max-width: 600px; margin: 0;font-size: clamp(44px, 5vw, 70px);line-height: 0.95;letter-spacing: -0.06em;}
+.showroom-services__header > p {max-width: 360px;margin: 0;color: rgba(255, 255, 255, 0.55);font-size: 14px; line-height: 1.7;}
+
+
+/* =========================================================
+   SERVICE LIST
+   ========================================================= */
+
+.showroom-services__list {border-top: 1px solid rgba(255, 255, 255, 0.16);}
+.showroom-service {display: grid;grid-template-columns: 70px minmax(0, 1fr) 60px;align-items: center;gap: 30px;min-height: 145px;
+    padding: 25px 0;border-bottom: 1px solid rgba(255, 255, 255, 0.16);color: #fff;transition:padding 220ms ease,background 220ms ease;}
+.showroom-service:hover {padding-left: 18px; padding-right: 18px;background: rgba(255, 255, 255, 0.045);}
+
+
+/* =========================================================
+   SERVICE NUMBER
+   ========================================================= */
+
+.showroom-service__number {color: rgba(255, 255, 255, 0.35);font-size: 11px;font-weight: 800;letter-spacing: 0.1em;}
+
+/* =========================================================
+   SERVICE CONTENT
+   ========================================================= */
+
+.showroom-service__content {max-width: 650px;}
+.showroom-service__content h3 {margin: 0;font-size: 25px;font-weight: 700;line-height: 1.15;letter-spacing: -0.03em;}
+.showroom-service__content p {max-width: 570px;margin: 9px 0 0;color: rgba(255, 255, 255, 0.48);font-size: 13px;line-height: 1.6;}
+
+
+/* =========================================================
+   SERVICE ARROW
+   ========================================================= */
+
+.showroom-service__arrow {display: flex;align-items: center;justify-content: center;width: 44px;height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.2);border-radius: 50%;color: rgba(255, 255, 255, 0.7);font-size: 17px;
+    transition:transform 220ms ease,background 220ms ease,color 220ms ease;}
+.showroom-service:hover .showroom-service__arrow {transform: rotate(45deg);background: #fff;color: var(--showroom-dark);}
+
+
+/* =========================================================
+   SERVICES — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .showroom-services {padding: 90px 0;}
+    .showroom-services__header {align-items: flex-start;flex-direction: column;gap: 25px;}
+    .showroom-services__header > p {max-width: 600px;}
+
+}
+
+
+/* =========================================================
+   SERVICES — MOBILE
+   ========================================================= */
+
+@media (max-width: 620px) {
+    .showroom-services {padding: 70px 0;}
+    .showroom-services__header {margin-bottom: 40px;}
+    .showroom-services__header h2 {font-size: 43px;}
+    .showroom-service {grid-template-columns: 35px minmax(0, 1fr) 44px;gap: 14px;min-height: 125px;padding: 22px 0;}
+    .showroom-service:hover {padding-left: 8px;padding-right: 8px;}
+    .showroom-service__content h3 {font-size: 19px;}
+    .showroom-service__content p {font-size: 12px;}
+    .showroom-service__arrow { width: 38px;height: 38px; font-size: 15px;}
+
+}
+/* =========================================================
+   FINAL CTA
+   ========================================================= */
+
+.showroom-cta {
+    padding: 100px 0;
+}
+
+
+/* =========================================================
+   CTA BOX
+   ========================================================= */
+
+.showroom-cta__box {
+    position: relative;
+
+    min-height: 420px;
+
+    display: flex;
+    align-items: center;
+
+    overflow: hidden;
+
+    padding: 70px 75px;
+
+    border-radius: 24px;
+
+    background: #e5e4df;
+}
+
+
+/* =========================================================
+   CTA CONTENT
+   ========================================================= */
+
+.showroom-cta__content {
+    position: relative;
+    z-index: 2;
+
+    max-width: 650px;
+}
+
+.showroom-cta__eyebrow {
+    display: block;
+
+    margin-bottom: 20px;
+
+    color: var(--showroom-muted);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 0.17em;
+}
+
+.showroom-cta h2 {
+    max-width: 620px;
+
+    margin: 0;
+
+    font-size: clamp(48px, 6vw, 82px);
+    line-height: 0.93;
+
+    letter-spacing: -0.065em;
+}
+
+.showroom-cta__content p {
+    max-width: 520px;
+
+    margin: 25px 0 0;
+
+    color: var(--showroom-muted);
+
+    font-size: 16px;
+    line-height: 1.65;
+}
+
+
+/* =========================================================
+   CTA ACTIONS
+   ========================================================= */
+
+.showroom-cta__actions {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 30px;
+}
+
+.showroom-cta__actions .btn span {
+    margin-left: 8px;
+}
+
+
+/* =========================================================
+   CTA BUTTONS
+   ========================================================= */
+
+.showroom-cta__primary {
+        height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--showroom-dark);
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: transform 180ms ease, background 180ms ease;
+}
+
+.showroom-cta__secondary {
+    
+    background: transparent;
+    color: var(--showroom-ink);
+}
+
+
+/* =========================================================
+   CTA DECORATIVE MARK
+   ========================================================= */
+
+.showroom-cta__mark {
+    position: absolute;
+
+    right: -20px;
+    bottom: -85px;
+
+    width: 430px;
+    height: 430px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    border-radius: 50%;
+
+    color: rgba(17, 17, 17, 0.035);
+
+    font-size: 300px;
+    font-weight: 800;
+
+    line-height: 1;
+
+    user-select: none;
+}
+
+
+/* =========================================================
+   CTA — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .showroom-cta {
+        padding: 80px 0;
+    }
+
+    .showroom-cta__box {
+        min-height: 380px;
+
+        padding: 60px 50px;
+    }
+
+    .showroom-cta__mark {
+        right: -100px;
+    }
+
+}
+
+
+/* =========================================================
+   CTA — MOBILE
+   ========================================================= */
+
+@media (max-width: 620px) {
+
+    .showroom-cta {
+        padding: 65px 0;
+    }
+
+    .showroom-cta__box {
+        min-height: auto;
+
+        padding: 45px 25px;
+
+        border-radius: 18px;
+    }
+
+    .showroom-cta h2 {
+        font-size: 46px;
+    }
+
+    .showroom-cta__content p {
+        font-size: 14px;
+    }
+
+    .showroom-cta__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .showroom-cta__actions .btn {
+        width: 100%;
+    }
+
+    .showroom-cta__mark {
+        right: -170px;
+        bottom: -100px;
+
+        width: 350px;
+        height: 350px;
+
+        font-size: 250px;
+    }
+
+}
+
+
+
+/* ---------------------------------------------------------
+   INVENTORY
+--------------------------------------------------------- */
+
+.showroom-vehicles {
+    padding: 110px 0;
+}
+
+.section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 42px;
+}
+
+.section-heading__label {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    color: var(--showroom-muted);
+}
+
+.section-heading h2 {
+    margin: 0;
+    font-size: clamp(38px, 5vw, 64px);
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+}
+
+.section-heading p {
+    max-width: 400px;
+    margin: 0;
+    color: var(--showroom-muted);
+    line-height: 1.6;
+}
+
+/* =========================================================
+   VEHICLE CARD — GLOBAL COMPONENT
+   ========================================================= */
+
+.vehicle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.vehicle-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 18px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+
+    transition:
+        transform 220ms ease,
+        box-shadow 220ms ease,
+        border-color 220ms ease;
+}
+
+.vehicle-card:hover {
+    transform: translateY(-4px);
+    border-color: #d8d8d8;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.10);
+}
+
+/* Card image */
+
+.vehicle-card__image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #f3f3f1;
+}
+
+.vehicle-card__image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    object-position: center;
+
+    transition: transform 350ms ease;
+}
+
+.vehicle-card:hover .vehicle-card__image img {
+    transform: scale(1.025);
+}
+
+/* Card body */
+
+.vehicle-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    padding: 22px;
+}
+
+/* Make */
+
+.vehicle-card__make {
+    margin-bottom: 8px;
+
+    color: #777777;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    line-height: 1.2;
+
+    text-transform: uppercase;
+}
+
+/* Vehicle name */
+
+.vehicle-card h2 {
+    margin: 0;
+
+    color: #171717;
+
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+}
+
+/* Variant */
+
+.vehicle-card__variant {
+    margin-top: 9px;
+
+    color: #777777;
+
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Specs */
+
+.vehicle-card__specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+
+    margin: 18px 0 10px;
+}
+
+.vehicle-card__specs span {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 7px 10px;
+
+    border: 1px solid #ddddda;
+    border-radius: 999px;
+
+    background: #fafaf8;
+    color: #666666;
+
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Footer */
+
+.vehicle-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    margin-top: auto;
+    padding-top: 20px;
+
+    border-top: 1px solid #e7e7e4;
+}
+
+.vehicle-card__footer strong {
+    color: #171717;
+
+    font-size: 17px;
+    font-weight: 750;
+    line-height: 1.2;
+}
+
+.vehicle-card__footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    color: #171717;
+
+    font-size: 14px;
+    font-weight: 650;
+    text-decoration: none;
+
+    transition:
+        transform 180ms ease,
+        opacity 180ms ease;
+}
+
+.vehicle-card__footer a:hover {
+    transform: translateX(3px);
+    opacity: 0.65;
+}
+
+/* =========================================================
+   VEHICLE CARD — RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+    .vehicle-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .vehicle-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .vehicle-card__body {
+        padding: 19px;
+    }
+
+    .vehicle-card h2 {
+        font-size: 22px;
+    }
+
+    .vehicle-card__image {
+        aspect-ratio: 4 / 3;
+    }
+}
+
+
+/* ---------------------------------------------------------
+   RESPONSIVE
+--------------------------------------------------------- */
+
+@media (max-width: 900px) {
+    .container {
+        width: min(100% - 32px, 700px);
+    }
+
+    .showroom-header__inner {
+        min-height: 70px;
+    }
+
+    .showroom-nav {
+        gap: 16px;
+    }
+
+    .showroom-hero {
+        padding: 75px 0;
+    }
+
+    .showroom-trust__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .showroom-trust__item:nth-child(2) {
+        border-right: 0;
+    }
+
+    .showroom-trust__item:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--showroom-line);
+    }
+
+    .vehicle-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .section-heading {
+        display: block;
+    }
+
+    .section-heading p {
+        margin-top: 18px;
+    }
+}
+
+@media (max-width: 620px) {
+    .showroom-nav {
+        display: none;
+    }
+
+    .showroom-hero h1 {
+        font-size: 54px;
+    }
+
+    .showroom-hero p {
+        font-size: 17px;
+    }
+
+    .showroom-hero__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .showroom-trust__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .showroom-trust__item {
+        border-right: 0;
+        border-bottom: 1px solid var(--showroom-line);
+    }
+
+    .showroom-trust__item:last-child {
+        border-bottom: 0;
+    }
+
+    .vehicle-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================================
+   VEHICLE DETAIL PAGE
+   ========================================================= */
+
+.vehicle-detail {
+    padding: 48px 0 100px;
+}
+
+.vehicle-detail__back {
+    display: inline-block;
+    margin-bottom: 32px;
+    color: #222;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.vehicle-detail__back:hover {
+    text-decoration: underline;
+}
+
+.vehicle-detail__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(340px, 380px);
+    gap: 32px;
+    align-items: start;
+}
+
+
+/* =========================================================
+   GALLERY
+   ========================================================= */
+
+.vehicle-gallery {
+    min-width: 0;
+}
+
+.vehicle-gallery__main {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f3f5;
+    border-radius: 16px;
+}
+
+.vehicle-gallery__main img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+}
+
+.vehicle-gallery__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: rgba(17, 17, 17, 0.75);
+    color: #fff;
+
+    font-size: 20px;
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+.vehicle-gallery__arrow:hover {
+    background: #111;
+}
+
+.vehicle-gallery__arrow--prev {
+    left: 16px;
+}
+
+.vehicle-gallery__arrow--next {
+    right: 16px;
+}
+
+.vehicle-gallery__counter {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    background: rgba(17, 17, 17, 0.75);
+    color: #fff;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.vehicle-gallery__thumbnails {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.vehicle-gallery__thumbnail {
+    flex: 0 0 84px;
+
+    width: 84px;
+    height: 62px;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 2px solid transparent;
+    border-radius: 10px;
+
+    background: #f1f3f5;
+
+    cursor: pointer;
+}
+
+.vehicle-gallery__thumbnail.is-active {
+    border-color: #111;
+}
+
+.vehicle-gallery__thumbnail img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* =========================================================
+   VEHICLE SUMMARY
+   ========================================================= */
+
+.vehicle-summary {
+    padding: 24px;
+    border: 1px solid #e2e2e2;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.vehicle-summary__make {
+    margin-bottom: 8px;
+
+    color: #777;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.vehicle-summary h1 {
+    margin: 0;
+
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1;
+    letter-spacing: -0.045em;
+}
+
+.vehicle-summary__variant {
+    margin: 12px 0 0;
+    color: #777;
+    font-size: 15px;
+}
+
+.vehicle-summary__price {
+    margin-top: 28px;
+    padding-top: 24px;
+
+    border-top: 1px solid #e5e5e5;
+
+    color: #111;
+
+    font-size: 27px;
+    font-weight: 800;
+}
+
+.vehicle-summary__actions {
+    display: grid;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.vehicle-summary__actions .btn {
+    width: 100%;
+    text-align: center;
+}
+
+.btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 46px;
+
+    border: 1px solid #20c76b;
+    border-radius: 999px;
+
+    background: #20c76b;
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.btn-whatsapp:hover {
+    background: #19ad5b;
+}
+
+
+/* =========================================================
+   QUICK SPECS
+   ========================================================= */
+
+.vehicle-summary__quick {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid #e5e5e5;
+}
+
+.vehicle-summary__quick-title {
+    margin-bottom: 12px;
+
+    color: #777;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+
+.vehicle-summary__quick-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 11px 0;
+
+    border-bottom: 1px solid #ededed;
+
+    font-size: 13px;
+}
+
+.vehicle-summary__quick-row span {
+    color: #777;
+}
+
+.vehicle-summary__quick-row strong {
+    color: #222;
+    text-align: right;
+}
+
+.vehicle-summary__availability {
+    margin-top: 22px;
+    padding-top: 20px;
+
+    border-top: 1px solid #e5e5e5;
+
+    text-align: center;
+}
+
+.vehicle-summary__availability span {
+    display: block;
+    margin-bottom: 6px;
+
+    color: #777;
+    font-size: 11px;
+}
+
+.vehicle-summary__availability strong {
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   FULL SPECIFICATIONS
+   ========================================================= */
+
+.vehicle-specifications {
+    margin-top: 42px;
+}
+
+.vehicle-specifications__tabs {
+    display: flex;
+    gap: 32px;
+
+    border-bottom: 1px solid #ddd;
+}
+
+.vehicle-specifications__tabs span {
+    position: relative;
+
+    padding: 0 0 12px;
+
+    color: #777;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.vehicle-specifications__tabs span.is-active {
+    color: #111;
+}
+
+.vehicle-specifications__tabs span.is-active::after {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+
+    height: 2px;
+
+    background: #111;
+}
+
+.vehicle-specifications__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+
+    margin-top: 16px;
+}
+
+.vehicle-specification {
+    min-height: 64px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    padding: 14px 16px;
+
+    border-radius: 8px;
+
+    background: #f3f5f7;
+}
+
+.vehicle-specification span {
+    margin-bottom: 5px;
+
+    color: #777;
+
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.vehicle-specification strong {
+    color: #222;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   SIMILAR VEHICLES
+   ========================================================= */
+
+   .similar-vehicles {
+    margin-top: 28px;
+}
+
+.similar-vehicles__heading {
+    margin-bottom: 16px;
+}
+
+.similar-vehicles__heading span {
+    display: block;
+    margin-bottom: 6px;
+    color: #777;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    line-height: 1.2;
+}
+
+.similar-vehicles__heading h2 {
+    margin: 0;
+    color: #171717;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.similar-vehicles__list {
+    display: grid;
+    gap: 10px;
+}
+
+.similar-vehicle {
+    display: grid;
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 12px;
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid #e2e2e2;
+    border-radius: 12px;
+    background: #fff;
+    transition:
+        transform 180ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease;
+}
+
+.similar-vehicle:hover {
+    transform: translateY(-2px);
+    border-color: #d5d5d5;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.similar-vehicle__image {
+    width: 82px;
+    height: 70px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f1f3f5;
+}
+
+.similar-vehicle__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.similar-vehicle__content {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.similar-vehicle__make {
+    margin-bottom: 3px;
+    color: #777;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.similar-vehicle__title {
+    display: block;
+    overflow: hidden;
+    color: #171717;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.similar-vehicle__variant {
+    display: block;
+    margin-top: 4px;
+    overflow: hidden;
+    color: #777;
+    font-size: 10px;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.similar-vehicle__price {
+    display: block;
+    margin-top: 6px;
+    color: #171717;
+    font-size: 11px;
+    font-weight: 750;
+}
+
+
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .vehicle-detail {
+        padding-top: 32px;
+    }
+
+    .vehicle-detail__layout {
+        grid-template-columns: 1fr;
+    }
+
+    .vehicle-summary {
+        order: 2;
+    }
+
+    .vehicle-gallery {
+        order: 1;
+    }
+
+}
+
+@media (max-width: 640px) {
+
+    .vehicle-detail {
+        padding: 24px 0 60px;
+    }
+
+    .vehicle-gallery__main {
+        aspect-ratio: 4 / 3;
+        border-radius: 12px;
+    }
+
+    .vehicle-gallery__arrow {
+        width: 36px;
+        height: 36px;
+        font-size: 17px;
+    }
+
+    .vehicle-gallery__arrow--prev {
+        left: 10px;
+    }
+
+    .vehicle-gallery__arrow--next {
+        right: 10px;
+    }
+
+    .vehicle-gallery__thumbnail {
+        flex-basis: 70px;
+        width: 70px;
+        height: 54px;
+    }
+
+    .vehicle-summary {
+        padding: 20px;
+    }
+
+    .vehicle-summary h1 {
+        font-size: 34px;
+    }
+
+    .vehicle-summary__price {
+        font-size: 24px;
+    }
+
+    .vehicle-specifications__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .similar-vehicles .vehicle-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* ─────────────────────────────────────────────
+   Inventory Pagination
+───────────────────────────────────────────── */
+
+.inventory-pagination {
+    margin-top: 42px;
+    padding-top: 28px;
+    border-top: 1px solid #dededb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.inventory-pagination__summary {
+    color: #737373;
+    font-size: 14px;
+}
+
+.inventory-pagination__summary strong {
+    color: #171717;
+    font-weight: 600;
+}
+
+.inventory-pagination__links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inventory-pagination__links a,
+.inventory-pagination__links span {
+   min-width: 42px;
+    height: 42px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #d8d8d5;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #171717;
+    font-size: 14px;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.inventory-pagination__links a:hover {
+    border-color: #171717;
+}
+
+.inventory-pagination__links .is-active {
+    border-color: #171717;
+    background: #171717;
+    color: #ffffff
+}
+
+.inventory-pagination__links .is-disabled {
+     color: #a0a0a0;
+    background: #f7f7f5;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   Inventory Empty State
+   ========================================================= */
+
+.inventory-empty {
+    margin-top: 42px;
+    padding: 80px 24px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    border: 1px solid #dededb;
+    border-radius: 20px;
+    background: #ffffff;
+}
+
+.inventory-empty__icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: #f1f3f5;
+
+    font-size: 28px;
+}
+
+.inventory-empty h2 {
+    margin: 10px 0 10px;
+    font-size: 28px;
+}
+
+.inventory-empty p {
+    max-width: 500px;
+    margin: 0 0 26px;
+    color: #737373;
+    line-height: 1.6;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+    .inventory-pagination {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .inventory-pagination__summary {
+        text-align: center;
+    }
+
+    .inventory-pagination__links {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+} 
+
+@media (max-width: 640px) {
+    .inventory-pagination__links {
+        flex-wrap: wrap;
+    }
+}
+
+/* ─────────────────────────────────────────────
+   Vehicle Image Gallery
+───────────────────────────────────────────── */
+
+.vehicle-detail__main-image {
+      width: 100%;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #eee;
+}
+
+.vehicle-detail__main-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 760px;
+    object-fit: cover;
+}
+
+.vehicle-detail__thumbnails {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.vehicle-detail__thumbnail {
+    flex: 0 0 88px;
+    width: 88px;
+    height: 66px;
+    padding: 0;
+    border: 1px solid #dededb;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #eee;
+    cursor: pointer;
+}
+
+.vehicle-detail__thumbnail:hover {
+    border-color: #111;
+}
+
+.vehicle-detail__thumbnail img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* =========================================================
+   Inventory Filters
+   ========================================================= */
+
+.inventory-filters {
+    margin-top: 32px;
+    margin-bottom: 42px;
+    padding: 22px;
+    display: grid;
+    grid-template-columns: minmax(240px, 1.7fr) repeat(4, minmax(130px, 1fr));
+    gap: 16px;
+    align-items: end;
+    border: 1px solid var(--border, #dededb);
+    border-radius: 18px;
+    background: #ffffff;
+}
+
+.inventory-filters > div {
+    min-width: 0;
+}
+
+.inventory-filters label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #737373;
+}
+
+.inventory-filters input,
+.inventory-filters select {
+    width: 100%;
+    height: 44px;
+    padding: 0 13px;
+    border: 1px solid #d8d8d5;
+    border-radius: 10px;
+    background: #fafaf8;
+    color: #171717;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.inventory-filters input:focus,
+.inventory-filters select:focus {
+    border-color: #171717;
+    background: #ffffff;
+}
+
+.inventory-filters__search {
+    grid-column: span 2;
+}
+
+.inventory-filters__actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.inventory-filters__actions .btn {
+    height: 44px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.inventory-filters__actions .btn-outline {
+    border: 1px solid #d4d4d1;
+    border-radius: 999px;
+    color: #171717;
+    background: #ffffff;
+}
+
+.inventory-filters__actions .btn-outline:hover {
+    border-color: #171717;
+}
+
+/* Price fields */
+.inventory-filters input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.inventory-filters input[type="number"]::-webkit-inner-spin-button,
+.inventory-filters input[type="number"]::-webkit-outer-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .inventory-filters {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .inventory-filters__search {
+        grid-column: span 3;
+    }
+
+    .inventory-filters__actions {
+        grid-column: span 3;
+    }
+}
+
+@media (max-width: 700px) {
+    .inventory-filters {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+
+    .inventory-filters__search {
+        grid-column: auto;
+    }
+
+    .inventory-filters__actions {
+        grid-column: auto;
+    }
+
+    .inventory-filters__actions .btn {
+        flex: 1;
+    }
+}
+
+/* =========================================================
+   VEHICLE DETAIL — SPECIFICATIONS
+   ========================================================= */
+
+.vehicle-detail__specifications {
+    margin-top: 34px;
+    padding-top: 30px;
+    border-top: 1px solid #e5e5e5;
+}
+
+.vehicle-detail__specifications-header {
+    margin-bottom: 20px;
+}
+
+.vehicle-detail__specifications-header .section-heading__label {
+    margin-bottom: 8px;
+}
+
+.vehicle-detail__specifications-header h2 {
+    margin: 0;
+    color: #171717;
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+}
+
+.vehicle-detail__specifications-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid #e5e5e5;
+    border-left: 1px solid #e5e5e5;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.vehicle-detail__specification {
+    min-width: 0;
+    padding: 16px 18px;
+    background: #ffffff;
+    border-right: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.vehicle-detail__specification span {
+    display: block;
+    margin-bottom: 6px;
+
+    color: #777777;
+
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.vehicle-detail__specification strong {
+    display: block;
+
+    color: #171717;
+
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .vehicle-detail__specifications {
+        margin-top: 28px;
+        padding-top: 24px;
+    }
+
+    .vehicle-detail__specifications-header h2 {
+        font-size: 24px;
+    }
+
+    .vehicle-detail__specifications-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vehicle-detail__specification {
+        padding: 14px 16px;
+    }
+}
+
+/* =========================================================
+   VEHICLE INFORMATION TABS
+   ========================================================= */
+
+.vehicle-information {
+    margin-top: 42px;
+}
+
+.vehicle-information__tabs {
+    display: flex;
+    gap: 38px;
+    border-bottom: 1px solid #ddd;
+}
+
+.vehicle-information__tab {
+    position: relative;
+
+    padding: 0 0 14px;
+
+    border: 0;
+    background: transparent;
+
+    color: #777;
+
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.vehicle-information__tab:hover {
+    color: #111;
+}
+
+.vehicle-information__tab.is-active {
+    color: #111;
+}
+
+.vehicle-information__tab.is-active::after {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+
+    height: 2px;
+
+    background: #111;
+}
+
+.vehicle-information__panel {
+    display: none;
+    padding-top: 16px;
+}
+
+.vehicle-information__panel.is-active {
+    display: block;
+}
+
+
+/* =========================================================
+   OVERVIEW
+   ========================================================= */
+
+.vehicle-overview {
+    padding: 28px;
+
+    border-radius: 10px;
+
+    background: #f3f5f7;
+}
+
+.vehicle-overview h2 {
+    margin: 0 0 14px;
+
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+.vehicle-overview p {
+    max-width: 800px;
+
+    margin: 0;
+
+    color: #666;
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   ENQUIRY
+   ========================================================= */
+
+.vehicle-enquiry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+
+    padding: 30px;
+
+    border: 1px solid #e2e2e2;
+    border-radius: 12px;
+
+    background: #fff;
+}
+
+.vehicle-enquiry h2 {
+    margin: 0 0 10px;
+
+    font-size: 25px;
+}
+
+.vehicle-enquiry p {
+    max-width: 600px;
+
+    margin: 0;
+
+    color: #777;
+    line-height: 1.6;
+}
+
+.vehicle-enquiry__actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 10px;
+}
+
+@media (max-width: 700px) {
+
+    .vehicle-information__tabs {
+        gap: 24px;
+        overflow-x: auto;
+    }
+
+    .vehicle-information__tab {
+        flex-shrink: 0;
+    }
+
+    .vehicle-enquiry {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .vehicle-enquiry__actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.showroom-footer {
+    margin-top: 100px;
+
+    background: var(--showroom-dark);
+    color: #fff;
+}
+
+
+/* =========================================================
+   FOOTER GRID
+   ========================================================= */
+
+.showroom-footer__grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(280px, 1.7fr)
+        repeat(3, minmax(140px, 1fr));
+
+    gap: 60px;
+
+    padding: 72px 0 64px;
+}
+
+
+/* =========================================================
+   FOOTER BRAND
+   ========================================================= */
+
+.showroom-footer__brand {
+    max-width: 360px;
+}
+
+.showroom-footer__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+
+    color: #fff;
+
+    font-size: 18px;
+    font-weight: 750;
+
+    letter-spacing: -0.04em;
+}
+
+.showroom-footer__logo-mark {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.showroom-footer__brand p {
+    max-width: 330px;
+
+    margin: 22px 0 0;
+
+    color: rgba(255, 255, 255, 0.58);
+
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   FOOTER CTA
+   ========================================================= */
+
+.showroom-footer__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-top: 24px;
+
+    color: #fff;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.showroom-footer__cta span {
+    font-size: 15px;
+
+    transition:
+        transform 180ms ease;
+}
+
+.showroom-footer__cta:hover span {
+    transform: translateX(4px);
+}
+
+
+/* =========================================================
+   FOOTER COLUMNS
+   ========================================================= */
+
+.showroom-footer__column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 11px;
+}
+
+.showroom-footer__column h3 {
+    margin: 0 0 10px;
+
+    color: #fff;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.showroom-footer__column a,
+.showroom-footer__column span {
+    color: rgba(255, 255, 255, 0.58);
+
+    font-size: 13px;
+    line-height: 1.4;
+
+    transition:
+        color 180ms ease;
+}
+
+.showroom-footer__column a:hover {
+    color: #fff;
+}
+
+
+/* =========================================================
+   FOOTER CONTACT
+   ========================================================= */
+
+.showroom-footer__contact a:first-of-type {
+    color: #fff;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   FOOTER BOTTOM
+   ========================================================= */
+
+.showroom-footer__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 20px 0;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+
+    color: rgba(255, 255, 255, 0.42);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   FOOTER — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .showroom-footer__grid {
+        grid-template-columns: 1.5fr 1fr 1fr;
+
+        gap: 40px;
+    }
+
+    .showroom-footer__brand {
+        grid-column: 1 / -1;
+        max-width: 500px;
+    }
+
+}
+
+
+/* =========================================================
+   FOOTER — MOBILE
+   ========================================================= */
+
+@media (max-width: 620px) {
+
+    .showroom-footer {
+        margin-top: 70px;
+    }
+
+    .showroom-footer__grid {
+        grid-template-columns: 1fr 1fr;
+
+        gap: 42px 28px;
+
+        padding: 55px 0 45px;
+    }
+
+    .showroom-footer__brand {
+        grid-column: 1 / -1;
+    }
+
+    .showroom-footer__bottom {
+        flex-direction: column;
+        align-items: flex-start;
+
+        padding: 18px 0;
+    }
+
+}
+
+
+
+
+/* =========================================================
+   ABOUT PAGE
+   ========================================================= */
+
+.about-hero {
+    padding: 120px 0 110px;
+    border-bottom: 1px solid var(--showroom-line);
+}
+
+.about-eyebrow {
+    display: inline-block;
+    margin-bottom: 22px;
+    color: var(--showroom-muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.about-hero h1 {
+    max-width: 850px;
+    margin: 0;
+    font-size: clamp(58px, 8vw, 110px);
+    line-height: 0.92;
+    letter-spacing: -0.065em;
+}
+
+.about-hero p {
+    max-width: 650px;
+    margin: 34px 0 0;
+    color: var(--showroom-muted);
+    font-size: 20px;
+    line-height: 1.55;
+}
+
+
+/* STORY */
+
+.about-story {
+    padding: 120px 0;
+}
+
+.about-story__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 80px;
+    align-items: center;
+}
+
+.about-story__visual {
+    overflow: hidden;
+    border-radius: 22px;
+    background: #e9e8e3;
+}
+
+.about-story__visual img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.about-story__content h2 {
+    max-width: 600px;
+    margin: 0;
+    font-size: clamp(42px, 5vw, 70px);
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+}
+
+.about-story__content p {
+    max-width: 560px;
+    margin: 26px 0 0;
+    color: var(--showroom-muted);
+    font-size: 17px;
+    line-height: 1.65;
+}
+
+.about-story__content .btn {
+    margin-top: 32px;
+}
+
+
+/* VALUES */
+
+.about-values {
+    padding: 110px 0;
+    background: #ebeae5;
+    border-top: 1px solid var(--showroom-line);
+    border-bottom: 1px solid var(--showroom-line);
+}
+
+.about-values__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--showroom-line);
+    border-left: 1px solid var(--showroom-line);
+}
+
+.about-value {
+    min-height: 250px;
+    padding: 32px;
+    border-right: 1px solid var(--showroom-line);
+    border-bottom: 1px solid var(--showroom-line);
+}
+
+.about-value > span {
+    display: block;
+    margin-bottom: 50px;
+    color: var(--showroom-muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.about-value h3 {
+    margin: 0;
+    font-size: 25px;
+    letter-spacing: -0.03em;
+}
+
+.about-value p {
+    max-width: 430px;
+    margin: 14px 0 0;
+    color: var(--showroom-muted);
+    line-height: 1.6;
+}
+
+
+/* CTA */
+
+.about-cta {
+    padding: 100px 0;
+}
+
+.about-cta__inner {
+    position: relative;
+    overflow: hidden;
+    padding: 75px;
+    border-radius: 24px;
+    background: #e6e5df;
+}
+
+.about-cta__inner::after {
+    content: "V";
+    position: absolute;
+    right: 50px;
+    bottom: -90px;
+    color: rgba(0, 0, 0, 0.035);
+    font-size: 330px;
+    font-weight: 800;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.about-cta__inner h2 {
+    max-width: 700px;
+    margin: 0;
+    font-size: clamp(48px, 6vw, 82px);
+    line-height: 0.95;
+    letter-spacing: -0.06em;
+}
+
+.about-cta__inner p {
+    max-width: 580px;
+    margin: 28px 0 0;
+    color: var(--showroom-muted);
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.about-cta__actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    gap: 12px;
+    margin-top: 34px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .about-story__grid {
+        grid-template-columns: 1fr;
+        gap: 50px;
+    }
+
+    .about-values__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-cta__inner {
+        padding: 50px 32px;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .about-hero {
+        padding: 80px 0;
+    }
+
+    .about-story,
+    .about-values {
+        padding: 80px 0;
+    }
+
+    .about-cta {
+        padding: 70px 0;
+    }
+
+    .about-cta__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .about-cta__actions .btn {
+        width: 100%;
+    }
+
+}
+
+/* =========================================================
+   CONTACT PAGE
+   ========================================================= */
+
+.contact-hero {
+    padding: 120px 0 110px;
+    border-bottom: 1px solid var(--showroom-line);
+}
+
+.contact-eyebrow {
+    display: inline-block;
+    margin-bottom: 22px;
+    color: var(--showroom-muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.contact-hero h1 {
+    max-width: 900px;
+    margin: 0;
+    font-size: clamp(56px, 8vw, 108px);
+    line-height: 0.92;
+    letter-spacing: -0.065em;
+}
+
+.contact-hero > .container > p {
+    max-width: 650px;
+    margin: 34px 0 0;
+    color: var(--showroom-muted);
+    font-size: 20px;
+    line-height: 1.55;
+}
+
+
+/* ---------------------------------------------------------
+   CONTACT MAIN
+--------------------------------------------------------- */
+
+.contact-main {
+    padding: 110px 0;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 90px;
+    align-items: start;
+}
+
+.contact-info h2 {
+    max-width: 500px;
+    margin: 0;
+    font-size: clamp(42px, 5vw, 68px);
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+}
+
+.contact-info__intro {
+    max-width: 480px;
+    margin: 28px 0 0;
+    color: var(--showroom-muted);
+    font-size: 16px;
+    line-height: 1.65;
+}
+
+
+/* CONTACT DETAILS */
+
+.contact-details {
+    margin-top: 55px;
+    border-top: 1px solid var(--showroom-line);
+}
+
+.contact-detail {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--showroom-line);
+}
+
+.contact-detail__label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--showroom-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+}
+
+.contact-detail a {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.contact-detail a:hover {
+    text-decoration: underline;
+}
+
+.contact-detail p {
+    margin: 0;
+    color: #333;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+
+/* FORM */
+
+.contact-form-wrap {
+    padding: 42px;
+    background: #ffffff;
+    border: 1px solid #e2e1dc;
+    border-radius: 22px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.05);
+}
+
+.contact-form-heading h2 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1;
+    letter-spacing: -0.045em;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin-top: 38px;
+}
+
+.contact-form__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.contact-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.contact-form__field label {
+    color: #555;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.contact-form__field input,
+.contact-form__field select,
+.contact-form__field textarea {
+    width: 100%;
+    border: 1px solid #d8d7d1;
+    border-radius: 12px;
+    background: #fafaf8;
+    color: var(--showroom-ink);
+    padding: 15px 16px;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    transition:
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        background 180ms ease;
+}
+
+.contact-form__field textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.contact-form__field input:focus,
+.contact-form__field select:focus,
+.contact-form__field textarea:focus {
+    border-color: #777;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+}
+
+.contact-form .btn {
+    align-self: flex-start;
+    border: 0;
+    cursor: pointer;
+}
+
+
+/* ---------------------------------------------------------
+   SHOWROOM
+--------------------------------------------------------- */
+
+.contact-showroom {
+    padding: 100px 0;
+    background: #ebeae5;
+    border-top: 1px solid var(--showroom-line);
+    border-bottom: 1px solid var(--showroom-line);
+}
+
+.contact-showroom__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.65fr);
+    gap: 80px;
+    align-items: center;
+}
+
+.contact-showroom__inner h2 {
+    max-width: 650px;
+    margin: 0;
+    font-size: clamp(45px, 5vw, 70px);
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+}
+
+.contact-showroom__inner > div:first-child p {
+    max-width: 550px;
+    margin: 28px 0 0;
+    color: var(--showroom-muted);
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+.contact-showroom__details {
+    padding: 35px;
+    border: 1px solid var(--showroom-line);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.contact-showroom__details strong {
+    display: block;
+    margin-bottom: 16px;
+    font-size: 20px;
+}
+
+.contact-showroom__details p {
+    margin: 7px 0;
+    color: var(--showroom-muted);
+}
+
+.contact-showroom__details .btn {
+    margin-top: 24px;
+}
+
+
+/* ---------------------------------------------------------
+   CONTACT CTA
+--------------------------------------------------------- */
+
+.contact-cta {
+    padding: 100px 0;
+}
+
+.contact-cta__inner {
+    position: relative;
+    overflow: hidden;
+    padding: 75px;
+    border-radius: 24px;
+    background: #e6e5df;
+}
+
+.contact-cta__inner::after {
+    content: "V";
+    position: absolute;
+    right: 45px;
+    bottom: -100px;
+    color: rgba(0, 0, 0, 0.035);
+    font-size: 340px;
+    font-weight: 800;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.contact-cta__inner h2 {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0;
+    font-size: clamp(48px, 6vw, 82px);
+    line-height: 0.95;
+    letter-spacing: -0.06em;
+}
+
+.contact-cta__inner p {
+    position: relative;
+    z-index: 1;
+    max-width: 560px;
+    margin: 28px 0;
+    color: var(--showroom-muted);
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+.contact-cta__inner .btn {
+    position: relative;
+    z-index: 2;
+}
+
+
+/* ---------------------------------------------------------
+   CONTACT RESPONSIVE
+--------------------------------------------------------- */
+
+@media (max-width: 900px) {
+
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 60px;
+    }
+
+    .contact-showroom__inner {
+        grid-template-columns: 1fr;
+        gap: 45px;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .contact-hero {
+        padding: 80px 0;
+    }
+
+    .contact-main,
+    .contact-showroom {
+        padding: 80px 0;
+    }
+
+    .contact-form-wrap {
+        padding: 28px 22px;
+        border-radius: 18px;
+    }
+
+    .contact-form__row {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-showroom__details {
+        padding: 26px;
+    }
+
+    .contact-cta {
+        padding: 70px 0;
+    }
+
+    .contact-cta__inner {
+        padding: 48px 28px;
+    }
+
+}
+
+/* =========================================================
+   CONTACT FORM FEEDBACK
+   ========================================================= */
+
+.contact-form__success,
+.contact-form__errors {
+    margin-bottom: 24px;
+    padding: 15px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.contact-form__success {
+    border: 1px solid #c9d9c9;
+    background: #eef5ee;
+    color: #315a36;
+}
+
+.contact-form__errors {
+    border: 1px solid #e2caca;
+    background: #faf0f0;
+    color: #7b3333;
+}
