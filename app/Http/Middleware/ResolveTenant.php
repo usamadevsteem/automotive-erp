@@ -42,12 +42,19 @@ class ResolveTenant
             return $sub ?: null;
         }
 
+        // The deployed Vercel domain is also a central/platform domain.
+        // It must not be treated as a tenant subdomain.
+        $appHost = parse_url((string) env('APP_URL', ''), PHP_URL_HOST);
+        if ($appHost && strcasecmp($host, $appHost) === 0) {
+            return null;
+        }
+
         // On localhost just use query/body param ?tenant=xxx for development,
         // and remember it in the session so it survives redirects that don't
         // carry the param (e.g. post-login redirect to '/').
-       if (app()->environment('local')) {
-    if ($request->input('tenant')) {
-        $request->session()->put('dev_tenant_subdomain', $request->input('tenant'));
+        if (app()->environment('local')) {
+            if ($request->input('tenant')) {
+                $request->session()->put('dev_tenant_subdomain', $request->input('tenant'));
                 return $request->input('tenant');
             }
 
@@ -57,9 +64,13 @@ class ResolveTenant
 
             return 'demo';
         }
+
+        // Production requests that are not explicitly mapped to a tenant
+        // belong to the central/platform application.
+        return null;
     }
 
-  private function bootTenant(Tenant $tenant): void
+    private function bootTenant(Tenant $tenant): void
     {
         app()->instance('tenant', $tenant);
         setPermissionsTeamId($tenant->id);
