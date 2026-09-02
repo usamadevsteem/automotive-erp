@@ -31,7 +31,8 @@ RUN composer install \
     --no-dev \
     --no-interaction \
     --prefer-dist \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --no-scripts
 
 COPY . .
 
@@ -41,6 +42,10 @@ RUN mkdir -p storage/framework/cache \
     storage/logs \
     bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
+
+RUN composer dump-autoload --optimize --no-scripts
+
+RUN php artisan package:discover --ansi
 
 ENV SERVER_NAME=:80
 
