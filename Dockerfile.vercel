@@ -36,13 +36,16 @@ RUN composer install \
 
 COPY . .
 
+# The repository may contain Laravel's cached package-discovery files from a dev install.
+# Remove them so production package discovery is rebuilt using only --no-dev dependencies.
+RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php \
+    && php artisan package:discover --ansi
+
 RUN mkdir -p storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs \
-    bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
-
 
 ENV SERVER_NAME=:80
 
