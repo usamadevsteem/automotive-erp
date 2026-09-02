@@ -36,6 +36,9 @@ RUN composer install \
 
 COPY . .
 
+# Aiven MySQL requires TLS. The CA certificate is bundled into the image.
+ENV MYSQL_ATTR_SSL_CA=/app/ca.pem
+
 # Prepare Laravel writable/cache directories before Artisan package discovery.
 RUN mkdir -p storage/framework/cache/data \
     storage/framework/sessions \
