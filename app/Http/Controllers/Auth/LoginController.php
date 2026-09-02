@@ -29,19 +29,32 @@ class LoginController extends Controller
 
         $this->checkRateLimit($request);
 
-        $tenant = app('tenant');
-
+        // On the central Vercel domain there is no tenant in the request host.
+        // Find the active user first, then establish that user's tenant context.
         $user = User::where('email', $request->email)
                     ->where('is_active', true)
                     ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            $this->logAttempt($request, null, $tenant->id, 'failed');
+            // A tenant is not available on the central login page, so there is
+            // no safe tenant_id to write to login_logs for an unknown user.
             $this->incrementRateLimit($request);
             throw ValidationException::withMessages([
                 'email' => 'These credentials do not match our records.',
             ]);
         }
+
+        $tenant = app()->bound('tenant') ? app('tenant') : $user->tenant;
+
+        if (!$tenant) {
+            throw ValidationException::withMessages([
+                'email' => 'This account is not linked to a dealership.',
+            ]);
+        }
+
+        // Establish tenant context for all tenant-scoped models and permissions.
+        app()->instance('tenant', $tenant);
+        setPermissionsTeamId($tenant->id);
 
         $this->logAttempt($request, $user->id, $tenant->id, 'success');
         $this->clearRateLimit($request);
