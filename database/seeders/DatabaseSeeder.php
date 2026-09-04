@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             PlanSeeder::class,
             PermissionSeeder::class,
             VehicleMakeSeeder::class,
+            DemoTenantSeeder::class,
         ]);
     }
 }
