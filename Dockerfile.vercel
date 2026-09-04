@@ -53,4 +53,7 @@ ENV SERVER_NAME=:80
 
 EXPOSE 80
 
-CMD ["frankenphp", "php-server", "--root", "public"]
+# Initialize the external Aiven database before serving requests.
+# Migrations and the default seeders are idempotent; the demo tenant seeder
+# only creates the demo tenant when it does not already exist.
+CMD ["sh", "-c", "php artisan migrate --force && php artisan db:seed --force && exec frankenphp php-server --root public"]
