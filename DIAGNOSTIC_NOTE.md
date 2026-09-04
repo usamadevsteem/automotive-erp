@@ -1,1 +1,0 @@
-Temporary diagnostic note; this file will be removed in the next cleanup commit.
