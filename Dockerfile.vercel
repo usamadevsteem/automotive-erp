@@ -53,7 +53,8 @@ ENV SERVER_NAME=:80
 
 EXPOSE 80
 
-# Initialize the external Aiven database before serving requests.
-# Migrations and the default seeders are idempotent; the demo tenant seeder
-# only creates the demo tenant when it does not already exist.
-CMD ["sh", "-c", "php artisan migrate --force && php artisan db:seed --force && exec frankenphp php-server --root public"]
+# Vercel can start multiple container instances at the same time. MySQL's
+# advisory lock serializes migrations/seeders so two instances cannot create
+# the same table concurrently. The lock connection stays alive for the whole
+# migration + seeding process and is released automatically on exit.
+CMD ["sh", "-c", "php -r '$host=getenv(\"DB_HOST\"); $port=getenv(\"DB_PORT\") ?: \"3306\"; $db=getenv(\"DB_DATABASE\"); $user=getenv(\"DB_USERNAME\"); $pass=getenv(\"DB_PASSWORD\"); $ca=getenv(\"MYSQL_ATTR_SSL_CA\"); $pdo=new PDO(\"mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4\", $user, $pass, [PDO::MYSQL_ATTR_SSL_CA=>$ca, PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]); $lock=\"automotive_erp_migrations\"; $stmt=$pdo->query(\"SELECT GET_LOCK(\" . $pdo->quote($lock) . \", 300)\"); if ((int)$stmt->fetchColumn() !== 1) { fwrite(STDERR, \"Could not acquire database migration lock.\\n\"); exit(1); } try { passthru(\"php artisan migrate --force && php artisan db:seed --force\", $exitCode); exit($exitCode); } finally { $pdo->query(\"SELECT RELEASE_LOCK(\" . $pdo->quote($lock) . \")\"); }' && exec frankenphp php-server --root public"]
